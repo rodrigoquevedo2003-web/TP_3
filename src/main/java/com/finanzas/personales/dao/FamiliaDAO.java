@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.List;
 
 @Repository
 public class FamiliaDAO {
@@ -37,5 +38,18 @@ public class FamiliaDAO {
         String sql = "INSERT INTO familia_usuario (id_familia, id_usuario, rol) VALUES (?, ?, ?)";
 
         jdbcTemplate.update(sql, idFamilia, idUsuario, rol);
+    }
+
+    public List<String> obtenerMiembros(Integer idFamilia) {
+        String sql = "SELECT u.nombre, u.apellido, fu.rol " +
+                "FROM familia_usuario fu " +
+                "JOIN usuarios u ON fu.id_usuario = u.id_usuario " +
+                "WHERE fu.id_familia = ?";
+
+        return jdbcTemplate.query(sql, (rs, rowNum) ->
+                        rs.getString("nombre") + " " +
+                                rs.getString("apellido") + " - " +
+                                rs.getString("rol")
+                , idFamilia);
     }
 }
