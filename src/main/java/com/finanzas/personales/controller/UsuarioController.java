@@ -1,4 +1,4 @@
-package com.finanzas.personales.controller;
+packagecom.finanzas.personales.controller;
 
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.service.UsuarioService;
