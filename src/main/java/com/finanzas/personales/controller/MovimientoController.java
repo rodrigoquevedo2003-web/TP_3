@@ -4,6 +4,7 @@ import com.finanzas.personales.model.Movimiento;
 import com.finanzas.personales.service.MovimientoService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/movimientos")
@@ -29,5 +30,15 @@ public class MovimientoController {
     @GetMapping("/familia/{idFamilia}")
     public List<Movimiento> listarPorFamilia(@PathVariable Integer idFamilia) {
         return movimientoService.listarPorFamilia(idFamilia);
+    }
+
+    @GetMapping("/saldo/usuario/{idUsuario}")
+    public BigDecimal calcularSaldoUsuario(@PathVariable Integer idUsuario) {
+        return movimientoService.calcularSaldoUsuario(idUsuario);
+    }
+
+    @GetMapping("/saldo/familia/{idFamilia}")
+    public BigDecimal calcularSaldoFamilia(@PathVariable Integer idFamilia) {
+        return movimientoService.calcularSaldoFamilia(idFamilia);
     }
 }

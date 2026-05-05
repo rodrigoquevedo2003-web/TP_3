@@ -5,6 +5,7 @@ import com.finanzas.personales.dao.MovimientoDAO;
 import com.finanzas.personales.model.Movimiento;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.math.BigDecimal;
 
 @Service
 public class MovimientoService {
@@ -38,5 +39,13 @@ public class MovimientoService {
 
     public List<Movimiento> listarPorFamilia(Integer idFamilia) {
         return movimientoDAO.listarPorFamilia(idFamilia);
+    }
+
+    public BigDecimal calcularSaldoUsuario(Integer idUsuario) {
+        return movimientoDAO.calcularSaldoUsuario(idUsuario);
+    }
+
+    public BigDecimal calcularSaldoFamilia(Integer idFamilia) {
+        return movimientoDAO.calcularSaldoFamilia(idFamilia);
     }
 }

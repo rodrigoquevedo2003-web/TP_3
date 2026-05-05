@@ -4,6 +4,7 @@ import com.finanzas.personales.model.Movimiento;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.math.BigDecimal;
 
 @Repository
 public class MovimientoDAO {
@@ -65,5 +66,41 @@ public class MovimientoDAO {
             m.setEsFamiliar(rs.getBoolean("es_familiar"));
             return m;
         }, idFamilia);
+    }
+
+    public BigDecimal calcularSaldoUsuario(Integer idUsuario) {
+        String sql = """
+            SELECT COALESCE(SUM(
+                CASE
+                    WHEN tipo = 'INGRESO' THEN monto
+                    WHEN tipo = 'GASTO' THEN -monto
+                    WHEN tipo = 'DEUDA' THEN -monto
+                    WHEN tipo = 'INVERSION' THEN -monto
+                    ELSE 0
+                END
+            ), 0)
+            FROM movimientos
+            WHERE id_usuario = ?
+            """;
+
+        return jdbcTemplate.queryForObject(sql, BigDecimal.class, idUsuario);
+    }
+
+    public BigDecimal calcularSaldoFamilia(Integer idFamilia) {
+        String sql = """
+            SELECT COALESCE(SUM(
+                CASE
+                    WHEN tipo = 'INGRESO' THEN monto
+                    WHEN tipo = 'GASTO' THEN -monto
+                    WHEN tipo = 'DEUDA' THEN -monto
+                    WHEN tipo = 'INVERSION' THEN -monto
+                    ELSE 0
+                END
+            ), 0)
+            FROM movimientos
+            WHERE id_familia = ?
+            """;
+
+        return jdbcTemplate.queryForObject(sql, BigDecimal.class, idFamilia);
     }
 }
