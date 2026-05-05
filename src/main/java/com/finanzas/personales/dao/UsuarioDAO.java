@@ -13,9 +13,8 @@ public class UsuarioDAO {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // INSERTAR USUARIO
     public void guardar(Usuario usuario) {
-        String sql = "INSERT INTO usuarios (nombre, apellido, username, email, password) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO usuarios (nombre, apellido, username, email, clave) VALUES (?, ?, ?, ?, ?)";
 
         jdbcTemplate.update(sql,
                 usuario.getNombre(),
