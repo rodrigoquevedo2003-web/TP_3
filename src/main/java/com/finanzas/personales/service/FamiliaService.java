@@ -22,4 +22,8 @@ public class FamiliaService {
                 "ADMIN"
         );
     }
+
+    public List<String> obtenerMiembros(Integer idFamilia) {
+        return familiaDAO.obtenerMiembros(idFamilia);
+    }
 }
