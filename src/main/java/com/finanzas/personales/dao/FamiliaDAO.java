@@ -52,4 +52,14 @@ public class FamiliaDAO {
                                 rs.getString("rol")
                 , idFamilia);
     }
+
+    public Integer buscarFamiliaDelUsuario(Integer idUsuario) {
+        String sql = "SELECT id_familia FROM familia_usuario WHERE id_usuario = ?";
+
+        try {
+            return jdbcTemplate.queryForObject(sql, Integer.class, idUsuario);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }
