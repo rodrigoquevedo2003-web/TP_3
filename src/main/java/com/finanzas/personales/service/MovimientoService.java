@@ -4,6 +4,7 @@ import com.finanzas.personales.dao.FamiliaDAO;
 import com.finanzas.personales.dao.MovimientoDAO;
 import com.finanzas.personales.model.Movimiento;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 public class MovimientoService {
@@ -29,5 +30,13 @@ public class MovimientoService {
         }
 
         movimientoDAO.guardar(movimiento);
+    }
+
+    public List<Movimiento> listarPorUsuario(Integer idUsuario) {
+        return movimientoDAO.listarPorUsuario(idUsuario);
+    }
+
+    public List<Movimiento> listarPorFamilia(Integer idFamilia) {
+        return movimientoDAO.listarPorFamilia(idFamilia);
     }
 }
