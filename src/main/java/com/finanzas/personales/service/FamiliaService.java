@@ -14,6 +14,12 @@ public class FamiliaService {
     }
 
     public void crearFamilia(Familia familia) {
-        familiaDAO.crearFamilia(familia);
+        Integer idFamiliaCreada = familiaDAO.crearFamilia(familia);
+
+        familiaDAO.agregarUsuarioAFamilia(
+                idFamiliaCreada,
+                familia.getIdUsuarioCreador(),
+                "ADMIN"
+        );
     }
 }
