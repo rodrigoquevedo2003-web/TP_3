@@ -38,4 +38,18 @@ public class InvitacionDAO {
 
         jdbcTemplate.update(sql, idInvitacion);
     }
+
+    public Invitacion obtenerPorId(Integer idInvitacion) {
+        String sql = "SELECT * FROM invitaciones WHERE id_invitacion = ?";
+
+        return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+            Invitacion inv = new Invitacion();
+            inv.setIdInvitacion(rs.getInt("id_invitacion"));
+            inv.setIdFamilia(rs.getInt("id_familia"));
+            inv.setIdUsuarioInvitado(rs.getInt("id_usuario_invitado"));
+            inv.setRolInvitado(rs.getString("rol_invitado"));
+            inv.setEstado(rs.getString("estado"));
+            return inv;
+        }, idInvitacion);
+    }
 }
