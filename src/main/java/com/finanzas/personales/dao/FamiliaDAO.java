@@ -62,4 +62,10 @@ public class FamiliaDAO {
             return null;
         }
     }
+
+    public void cambiarRolMiembro(Integer idFamilia, Integer idUsuario, String nuevoRol) {
+        String sql = "UPDATE familia_usuario SET rol = ? WHERE id_familia = ? AND id_usuario = ?";
+
+        jdbcTemplate.update(sql, nuevoRol, idFamilia, idUsuario);
+    }
 }

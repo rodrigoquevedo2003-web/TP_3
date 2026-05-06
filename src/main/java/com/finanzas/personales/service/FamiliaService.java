@@ -28,4 +28,8 @@ public class FamiliaService {
     public List<String> obtenerMiembros(Integer idFamilia) {
         return familiaDAO.obtenerMiembros(idFamilia);
     }
+
+    public void cambiarRolMiembro(Integer idFamilia, Integer idUsuario, String nuevoRol) {
+        familiaDAO.cambiarRolMiembro(idFamilia, idUsuario, nuevoRol);
+    }
 }
