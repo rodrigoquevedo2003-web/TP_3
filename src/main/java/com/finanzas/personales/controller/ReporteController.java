@@ -20,4 +20,11 @@ public class ReporteController {
     public List<ReporteCategoriaDTO> gastosPorCategoria(@PathVariable Integer idUsuario) {
         return reporteService.gastosPorCategoria(idUsuario);
     }
+
+    @GetMapping("/categorias/usuario/{idUsuario}/ultimos/{meses}")
+    public List<ReporteCategoriaDTO> gastosPorCategoriaUltimosMeses(
+            @PathVariable Integer idUsuario,
+            @PathVariable Integer meses) {
+        return reporteService.gastosPorCategoriaUltimosMeses(idUsuario, meses);
+    }
 }

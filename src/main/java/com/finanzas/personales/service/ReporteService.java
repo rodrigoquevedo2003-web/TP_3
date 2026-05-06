@@ -18,4 +18,8 @@ public class ReporteService {
     public List<ReporteCategoriaDTO> gastosPorCategoria(Integer idUsuario) {
         return reporteDAO.gastosPorCategoria(idUsuario);
     }
+
+    public List<ReporteCategoriaDTO> gastosPorCategoriaUltimosMeses(Integer idUsuario, Integer meses) {
+        return reporteDAO.gastosPorCategoriaUltimosMeses(idUsuario, meses);
+    }
 }
