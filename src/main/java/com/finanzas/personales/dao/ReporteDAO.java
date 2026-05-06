@@ -59,4 +59,27 @@ public class ReporteDAO {
                         )
                 , idUsuario, meses);
     }
+
+    public List<ReporteCategoriaDTO> ingresosPorCategoriaUltimosMeses(Integer idUsuario, Integer meses) {
+
+        String sql = """
+            SELECT c.nombre AS categoria,
+                   SUM(m.monto) AS total
+            FROM movimientos m
+            JOIN categorias c
+                ON m.id_categoria = c.id_categoria
+            WHERE m.id_usuario = ?
+              AND m.tipo = 'INGRESO'
+              AND m.fecha >= DATE_SUB(CURDATE(), INTERVAL ? MONTH)
+            GROUP BY c.nombre
+            ORDER BY total DESC
+            """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) ->
+                        new ReporteCategoriaDTO(
+                                rs.getString("categoria"),
+                                rs.getBigDecimal("total")
+                        )
+                , idUsuario, meses);
+    }
 }

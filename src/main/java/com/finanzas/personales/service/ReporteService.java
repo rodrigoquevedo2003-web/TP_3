@@ -22,4 +22,8 @@ public class ReporteService {
     public List<ReporteCategoriaDTO> gastosPorCategoriaUltimosMeses(Integer idUsuario, Integer meses) {
         return reporteDAO.gastosPorCategoriaUltimosMeses(idUsuario, meses);
     }
+
+    public List<ReporteCategoriaDTO> ingresosPorCategoriaUltimosMeses(Integer idUsuario, Integer meses) {
+        return reporteDAO.ingresosPorCategoriaUltimosMeses(idUsuario, meses);
+    }
 }
