@@ -50,4 +50,27 @@ public class UsuarioDAO {
             return null;
         }
     }
+
+    public Usuario buscarPorEmail(String email) {
+
+        String sql = "SELECT * FROM usuarios WHERE email = ?";
+
+        try {
+            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+                Usuario u = new Usuario();
+
+                u.setIdUsuario(rs.getInt("id_usuario"));
+                u.setNombre(rs.getString("nombre"));
+                u.setApellido(rs.getString("apellido"));
+                u.setUsername(rs.getString("username"));
+                u.setEmail(rs.getString("email"));
+                u.setPassword(rs.getString("clave"));
+
+                return u;
+            }, email);
+
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

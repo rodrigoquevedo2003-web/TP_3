@@ -34,4 +34,19 @@ public class UsuarioService {
 
         return usuario;
     }
+
+    public Usuario login(LoginDTO loginDTO) {
+
+        Usuario usuario = usuarioDAO.buscarPorEmail(loginDTO.getEmail());
+
+        if (usuario == null) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+
+        if (!usuario.getPassword().equals(loginDTO.getPassword())) {
+            throw new RuntimeException("Contraseña incorrecta");
+        }
+
+        return usuario;
+    }
 }
