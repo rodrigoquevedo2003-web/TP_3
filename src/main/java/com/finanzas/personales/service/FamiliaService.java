@@ -29,7 +29,14 @@ public class FamiliaService {
         return familiaDAO.obtenerMiembros(idFamilia);
     }
 
-    public void cambiarRolMiembro(Integer idFamilia, Integer idUsuario, String nuevoRol) {
-        familiaDAO.cambiarRolMiembro(idFamilia, idUsuario, nuevoRol);
+    public void cambiarRolMiembro(Integer idFamilia, Integer idUsuarioAdmin, Integer idUsuarioObjetivo, String nuevoRol) {
+
+        String rolAdmin = familiaDAO.obtenerRolUsuario(idFamilia, idUsuarioAdmin);
+
+        if (rolAdmin == null || !rolAdmin.equals("ADMIN")) {
+            throw new RuntimeException("Solo el ADMIN puede cambiar roles");
+        }
+
+        familiaDAO.cambiarRolMiembro(idFamilia, idUsuarioObjetivo, nuevoRol);
     }
 }

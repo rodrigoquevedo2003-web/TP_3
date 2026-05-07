@@ -28,15 +28,17 @@ public class FamiliaController {
         return familiaService.obtenerMiembros(idFamilia);
     }
 
-    @PutMapping("/{idFamilia}/miembros/{idUsuario}/rol")
+    @PutMapping("/{idFamilia}/miembros/{idUsuarioObjetivo}/rol")
     public String cambiarRolMiembro(
             @PathVariable Integer idFamilia,
-            @PathVariable Integer idUsuario,
+            @PathVariable Integer idUsuarioObjetivo,
+            @RequestParam Integer idUsuarioAdmin,
             @RequestBody FamiliaUsuario familiaUsuario) {
 
         familiaService.cambiarRolMiembro(
                 idFamilia,
-                idUsuario,
+                idUsuarioAdmin,
+                idUsuarioObjetivo,
                 familiaUsuario.getRol()
         );
 

@@ -68,4 +68,14 @@ public class FamiliaDAO {
 
         jdbcTemplate.update(sql, nuevoRol, idFamilia, idUsuario);
     }
+
+    public String obtenerRolUsuario(Integer idFamilia, Integer idUsuario) {
+        String sql = "SELECT rol FROM familia_usuario WHERE id_familia = ? AND id_usuario = ?";
+
+        try {
+            return jdbcTemplate.queryForObject(sql, String.class, idFamilia, idUsuario);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }
