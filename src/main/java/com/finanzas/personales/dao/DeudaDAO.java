@@ -55,4 +55,54 @@ public class DeudaDAO {
                 deuda.getTipoDeuda()
         );
     }
+
+    public Deuda buscarPorId(Integer idDeuda) {
+
+        String sql = "SELECT * FROM deudas WHERE id_deuda = ?";
+
+        return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+
+            Deuda d = new Deuda();
+
+            d.setIdDeuda(rs.getInt("id_deuda"));
+            d.setIdUsuario(rs.getInt("id_usuario"));
+            d.setIdFamilia(rs.getObject("id_familia", Integer.class));
+
+            d.setNombre(rs.getString("nombre"));
+            d.setDescripcion(rs.getString("descripcion"));
+
+            d.setMontoTotal(rs.getBigDecimal("monto_total"));
+            d.setMontoPagado(rs.getBigDecimal("monto_pagado"));
+
+            d.setCantidadCuotas(rs.getInt("cantidad_cuotas"));
+            d.setCuotasPagadas(rs.getInt("cuotas_pagadas"));
+
+            d.setMontoCuota(rs.getBigDecimal("monto_cuota"));
+
+            d.setEstado(rs.getString("estado"));
+
+            return d;
+
+        }, idDeuda);
+    }
+
+    public void actualizarPago(Integer idDeuda,
+                               Integer cuotasPagadas,
+                               java.math.BigDecimal montoPagado,
+                               String estado) {
+
+        String sql = """
+            UPDATE deudas
+            SET cuotas_pagadas = ?,
+                monto_pagado = ?,
+                estado = ?
+            WHERE id_deuda = ?
+            """;
+
+        jdbcTemplate.update(sql,
+                cuotasPagadas,
+                montoPagado,
+                estado,
+                idDeuda);
+    }
 }

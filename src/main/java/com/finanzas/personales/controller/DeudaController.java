@@ -19,4 +19,12 @@ public class DeudaController {
         deudaService.crearDeuda(deuda);
         return "Deuda creada correctamente";
     }
+
+    @PutMapping("/{idDeuda}/pagar-cuota")
+    public String pagarCuota(@PathVariable Integer idDeuda) {
+
+        deudaService.pagarCuota(idDeuda);
+
+        return "Cuota pagada correctamente";
+    }
 }
