@@ -5,7 +5,7 @@ import com.finanzas.personales.model.Usuario;
 import org.springframework.stereotype.Service;
 
 @Service
-public   class UsuarioService {
+public class UsuarioService {
 
     private final UsuarioDAO usuarioDAO;
 

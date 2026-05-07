@@ -52,7 +52,11 @@ public class DeudaService {
         if (deuda.getCantidadCuotas() != null && deuda.getMontoCuota() == null) {
             deuda.setMontoCuota(
                     deuda.getMontoTotal()
-                            .divide(BigDecimal.valueOf(deuda.getCantidadCuotas()))
+                            .divide(
+                                    BigDecimal.valueOf(deuda.getCantidadCuotas()),
+                                    2,
+                                    java.math.RoundingMode.HALF_UP
+                            )
             );
         }
 

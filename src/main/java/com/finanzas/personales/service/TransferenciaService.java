@@ -32,28 +32,45 @@ public class TransferenciaService {
 
         transferenciaDAO.guardar(transferencia);
 
+        // Movimiento salida (se descuenta)
+
         Movimiento salida = new Movimiento();
 
         salida.setIdUsuario(transferencia.getIdUsuarioOrigen());
         salida.setIdFamilia(idFamilia);
+
         salida.setIdCategoria(1);
-        salida.setTipo("TRANSFERENCIA");
+
+        salida.setTipo("GASTO");
+
         salida.setDescripcion("Transferencia enviada");
+
         salida.setMonto(transferencia.getMonto());
+
         salida.setFecha(transferencia.getFecha());
+
         salida.setEsFamiliar(true);
 
         movimientoDAO.guardar(salida);
 
+        // Movimiento entrada (se suma)
+
         Movimiento entrada = new Movimiento();
 
         entrada.setIdUsuario(transferencia.getIdUsuarioDestino());
+
         entrada.setIdFamilia(idFamilia);
+
         entrada.setIdCategoria(1);
+
         entrada.setTipo("INGRESO");
+
         entrada.setDescripcion("Transferencia recibida");
+
         entrada.setMonto(transferencia.getMonto());
+
         entrada.setFecha(transferencia.getFecha());
+
         entrada.setEsFamiliar(true);
 
         movimientoDAO.guardar(entrada);
