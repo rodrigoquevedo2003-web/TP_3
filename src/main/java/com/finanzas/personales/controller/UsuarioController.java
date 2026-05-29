@@ -3,8 +3,6 @@ package com.finanzas.personales.controller;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.service.UsuarioService;
 import org.springframework.web.bind.annotation.*;
-import com.finanzas.personales.dto.LoginDTO;
-import com.finanzas.personales.dto.LoginDTO;
 import jakarta.servlet.http.HttpSession;
 
 @RestController
@@ -23,21 +21,21 @@ public class UsuarioController {
         return "Usuario creado correctamente";
     }
 
-    @PostMapping("/login")
-    public Usuario login(@RequestBody LoginDTO loginDTO) {
-
-        return usuarioService.login(loginDTO);
-    }
-
-    @PostMapping("/login")
-    public String login(@RequestBody LoginDTO loginDTO, HttpSession session) {
-
-        Usuario usuario = usuarioService.login(loginDTO);
-
-        session.setAttribute("usuarioLogueado", usuario);
-
-        return "Sesión iniciada correctamente";
-    }
+//    @PostMapping("/login")
+//    public Usuario login(@RequestBody LoginDTO loginDTO) {
+//
+//        return usuarioService.login(loginDTO);
+//    }
+//
+//    @PostMapping("/login")
+//    public String login(@RequestBody LoginDTO loginDTO, HttpSession session) {
+//
+//        Usuario usuario = usuarioService.login(loginDTO);
+//
+//        session.setAttribute("usuarioLogueado", usuario);
+//
+//        return "Sesión iniciada correctamente";
+//    }
 
     @GetMapping("/actual")
     public Usuario usuarioActual(HttpSession session) {

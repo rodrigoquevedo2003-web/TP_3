@@ -1,51 +1,31 @@
 package com.finanzas.personales.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "categoria")
 public class Categoria {
 
-    private Integer idCategoria;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotBlank
     private String nombre;
-    private String tipo;
-    private Boolean fija;
 
-    public Categoria() {
-    }
+    private String icono;
 
-    public Categoria(Integer idCategoria, String nombre, String tipo, Boolean fija) {
-        this.idCategoria = idCategoria;
-        this.nombre = nombre;
-        this.tipo = tipo;
-        this.fija = fija;
-    }
-
-    public Integer getIdCategoria() {
-        return idCategoria;
-    }
-
-    public void setIdCategoria(Integer idCategoria) {
-        this.idCategoria = idCategoria;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
-    public Boolean getFija() {
-        return fija;
-    }
-
-    public void setFija(Boolean fija) {
-        this.fija = fija;
-    }
+    @OneToMany(mappedBy = "categoria")
+    @JsonIgnore
+    private List<Movimiento> movimientos;
 }
