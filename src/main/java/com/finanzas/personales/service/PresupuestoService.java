@@ -63,4 +63,13 @@ public class PresupuestoService {
 
         return true;
     }
+
+    public BigDecimal calcularDisponible(Long idPresupuesto){
+        Presupuesto p = presupuestoRepository.findById(idPresupuesto).orElseThrow(() -> new PresupuestoInexistenteException("presupuesto inexistente"));
+
+        BigDecimal resto = p.getMontoLimite().subtract(p.getMontoConsumido());
+
+        return resto;
+    }
+    
 }
