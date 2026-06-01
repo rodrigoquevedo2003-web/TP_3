@@ -1,10 +1,11 @@
 package com.finanzas.personales.controller;
 
+import com.finanzas.personales.dto.MovimientoDTO;
 import com.finanzas.personales.model.Movimiento;
 import com.finanzas.personales.service.MovimientoService;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
-import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/movimientos")
@@ -17,28 +18,32 @@ public class MovimientoController {
     }
 
     @PostMapping
-    public String crearMovimiento(@RequestBody Movimiento movimiento) {
-        movimientoService.crearMovimiento(movimiento);
-        return "Movimiento creado correctamente";
+    public Movimiento crearMovimiento(@RequestBody MovimientoDTO dto) {
+        return movimientoService.crearMovimiento(dto);
     }
 
-    @GetMapping("/usuario/{idUsuario}")
-    public List<Movimiento> listarPorUsuario(@PathVariable Integer idUsuario) {
-        return movimientoService.listarPorUsuario(idUsuario);
+    @GetMapping
+    public List<Movimiento> listarMovimientos() {
+        return movimientoService.listarMovimientos();
     }
 
-    @GetMapping("/familia/{idFamilia}")
-    public List<Movimiento> listarPorFamilia(@PathVariable Integer idFamilia) {
-        return movimientoService.listarPorFamilia(idFamilia);
+    @GetMapping("/{id}")
+    public Movimiento buscarPorId(@PathVariable Long id) {
+        return movimientoService.buscarPorId(id);
     }
 
-    @GetMapping("/saldo/usuario/{idUsuario}")
-    public BigDecimal calcularSaldoUsuario(@PathVariable Integer idUsuario) {
-        return movimientoService.calcularSaldoUsuario(idUsuario);
+    @GetMapping("/cuenta/{cuentaId}")
+    public List<Movimiento> listarPorCuenta(@PathVariable Long cuentaId) {
+        return movimientoService.listarPorCuenta(cuentaId);
     }
 
-    @GetMapping("/saldo/familia/{idFamilia}")
-    public BigDecimal calcularSaldoFamilia(@PathVariable Integer idFamilia) {
-        return movimientoService.calcularSaldoFamilia(idFamilia);
+    @GetMapping("/categoria/{categoriaId}")
+    public List<Movimiento> listarPorCategoria(@PathVariable Long categoriaId) {
+        return movimientoService.listarPorCategoria(categoriaId);
+    }
+
+    @DeleteMapping("/{id}")
+    public void eliminarMovimiento(@PathVariable Long id) {
+        movimientoService.eliminarMovimiento(id);
     }
 }

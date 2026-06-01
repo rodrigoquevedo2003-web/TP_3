@@ -1,51 +1,83 @@
 package com.finanzas.personales.service;
 
-import com.finanzas.personales.dao.FamiliaDAO;
-import com.finanzas.personales.dao.MovimientoDAO;
+import com.finanzas.personales.dto.MovimientoDTO;
+import com.finanzas.personales.model.Categoria;
+import com.finanzas.personales.model.Cuenta;
 import com.finanzas.personales.model.Movimiento;
+import com.finanzas.personales.model.TipoMovimiento;
+import com.finanzas.personales.repository.CategoriaRepository;
+import com.finanzas.personales.repository.CuentaRepository;
+import com.finanzas.personales.repository.MovimientoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
-import java.math.BigDecimal;
 
 @Service
 public class MovimientoService {
 
-    private final MovimientoDAO movimientoDAO;
-    private final FamiliaDAO familiaDAO;
+    private final MovimientoRepository movimientoRepository;
+    private final CuentaRepository cuentaRepository;
+    private final CategoriaRepository categoriaRepository;
 
-    public MovimientoService(MovimientoDAO movimientoDAO, FamiliaDAO familiaDAO) {
-        this.movimientoDAO = movimientoDAO;
-        this.familiaDAO = familiaDAO;
+    public MovimientoService(MovimientoRepository movimientoRepository,
+                             CuentaRepository cuentaRepository,
+                             CategoriaRepository categoriaRepository) {
+        this.movimientoRepository = movimientoRepository;
+        this.cuentaRepository = cuentaRepository;
+        this.categoriaRepository = categoriaRepository;
     }
 
-    public void crearMovimiento(Movimiento movimiento) {
+    @Transactional
+    public Movimiento crearMovimiento(MovimientoDTO dto) {
 
-        // Buscar si el usuario tiene familia
-        Integer idFamilia = familiaDAO.buscarFamiliaDelUsuario(movimiento.getIdUsuario());
+        Cuenta cuenta = cuentaRepository.findById(dto.getCuentaId())
+                .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
 
-        if (idFamilia != null) {
-            movimiento.setIdFamilia(idFamilia);
-            movimiento.setEsFamiliar(true);
+        Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
+                .orElseThrow(() -> new RuntimeException("Categoria no encontrada"));
+
+        Movimiento movimiento = new Movimiento();
+        movimiento.setCuenta(cuenta);
+        movimiento.setCategoria(categoria);
+        movimiento.setTipo(dto.getTipo());
+        movimiento.setDescripcion(dto.getDescripcion());
+        movimiento.setMonto(dto.getMonto());
+        movimiento.setFecha(dto.getFecha());
+        movimiento.setEsFamiliar(dto.getEsFamiliar());
+
+        if (dto.getTipo() == TipoMovimiento.INGRESO) {
+            cuenta.setSaldo(cuenta.getSaldo().add(dto.getMonto()));
+        } else if (dto.getTipo() == TipoMovimiento.EGRESO) {
+            cuenta.setSaldo(cuenta.getSaldo().subtract(dto.getMonto()));
         } else {
-            movimiento.setEsFamiliar(false);
+            throw new RuntimeException("Tipo de movimiento inválido");
         }
 
-        movimientoDAO.guardar(movimiento);
+        cuentaRepository.save(cuenta);
+
+        return movimientoRepository.save(movimiento);
     }
 
-    public List<Movimiento> listarPorUsuario(Integer idUsuario) {
-        return movimientoDAO.listarPorUsuario(idUsuario);
+    public List<Movimiento> listarMovimientos() {
+        return movimientoRepository.findAll();
     }
 
-    public List<Movimiento> listarPorFamilia(Integer idFamilia) {
-        return movimientoDAO.listarPorFamilia(idFamilia);
+    public Movimiento buscarPorId(Long id) {
+        return movimientoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Movimiento no encontrado"));
     }
 
-    public BigDecimal calcularSaldoUsuario(Integer idUsuario) {
-        return movimientoDAO.calcularSaldoUsuario(idUsuario);
+    public List<Movimiento> listarPorCuenta(Long cuentaId) {
+        return movimientoRepository.findByCuentaId(cuentaId);
     }
 
-    public BigDecimal calcularSaldoFamilia(Integer idFamilia) {
-        return movimientoDAO.calcularSaldoFamilia(idFamilia);
+    public List<Movimiento> listarPorCategoria(Long categoriaId) {
+        return movimientoRepository.findByCategoriaId(categoriaId);
+    }
+
+    public void eliminarMovimiento(Long id) {
+        Movimiento movimiento = buscarPorId(id);
+        movimientoRepository.delete(movimiento);
     }
 }
