@@ -1,31 +1,51 @@
 package com.finanzas.personales.model;
 
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@Entity
+@Table(name="movimiento")
 public class Movimiento {
 
-    private Integer idMovimiento;
-    private Integer idUsuario;
-    private Integer idFamilia;
-    private Integer idCategoria;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private String tipo;
+
+
+    @ManyToOne
+    @JoinColumn(name = "cuenta_id", nullable = false)
+    private Cuenta cuenta;
+
+    @ManyToOne
+    @JoinColumn(name = "categoria_id", nullable = false)
+    private Categoria categoria;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoMovimiento tipo;
+
+    @Column(nullable = false)
     private String descripcion;
+
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal monto;
+
+    @Column(nullable = false)
     private LocalDate fecha;
+
+    @Column(nullable = false)
     private Boolean esFamiliar;
 
     public Movimiento() {
     }
 
-    public Movimiento(Integer idMovimiento, Integer idUsuario, Integer idFamilia,
-                      Integer idCategoria, String tipo, String descripcion,
-                      BigDecimal monto, LocalDate fecha, Boolean esFamiliar) {
-        this.idMovimiento = idMovimiento;
-        this.idUsuario = idUsuario;
-        this.idFamilia = idFamilia;
-        this.idCategoria = idCategoria;
+    public Movimiento(Long id, Cuenta cuenta, Categoria categoria, TipoMovimiento tipo, String descripcion, BigDecimal monto, LocalDate fecha, Boolean esFamiliar) {
+        this.id = id;
+        this.cuenta = cuenta;
+        this.categoria = categoria;
         this.tipo = tipo;
         this.descripcion = descripcion;
         this.monto = monto;
@@ -33,43 +53,36 @@ public class Movimiento {
         this.esFamiliar = esFamiliar;
     }
 
-    public Integer getIdMovimiento() {
-        return idMovimiento;
+    public Long getId() {
+        return id;
     }
 
-    public void setIdMovimiento(Integer idMovimiento) {
-        this.idMovimiento = idMovimiento;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public Integer getIdUsuario() {
-        return idUsuario;
+
+    public Cuenta getCuenta() {
+        return cuenta;
     }
 
-    public void setIdUsuario(Integer idUsuario) {
-        this.idUsuario = idUsuario;
+    public void setCuenta(Cuenta cuenta) {
+        this.cuenta = cuenta;
     }
 
-    public Integer getIdFamilia() {
-        return idFamilia;
+    public Categoria getCategoria() {
+        return categoria;
     }
 
-    public void setIdFamilia(Integer idFamilia) {
-        this.idFamilia = idFamilia;
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
     }
 
-    public Integer getIdCategoria() {
-        return idCategoria;
-    }
-
-    public void setIdCategoria(Integer idCategoria) {
-        this.idCategoria = idCategoria;
-    }
-
-    public String getTipo() {
+    public TipoMovimiento getTipo() {
         return tipo;
     }
 
-    public void setTipo(String tipo) {
+    public void setTipo(TipoMovimiento tipo) {
         this.tipo = tipo;
     }
 

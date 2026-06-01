@@ -18,12 +18,12 @@ public class Cuenta {
     @Column(nullable = false)
     private double saldo;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @OneToMany(mappedBy = "usuario")
-    List<Movimiento>movimientos;
+    @OneToMany(mappedBy = "cuenta")
+    private List<Movimiento> movimientos;
 
     public Cuenta(Long id, String nombre, double saldo, Usuario usuario, List<Movimiento> movimientos) {
         this.id = id;
