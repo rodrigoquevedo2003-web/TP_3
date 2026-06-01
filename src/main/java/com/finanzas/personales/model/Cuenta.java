@@ -1,5 +1,6 @@
 package com.finanzas.personales.model;
 
+import com.finanzas.personales.enums.TipoCuenta;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -19,6 +20,13 @@ public class Cuenta {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal saldo;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoCuenta tipoCuenta;
+
+    @Column(nullable = false)
+    private Boolean activa = true;
+
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
@@ -29,10 +37,13 @@ public class Cuenta {
     public Cuenta() {
     }
 
-    public Cuenta(Long id, String nombre, BigDecimal saldo, Usuario usuario, List<Movimiento> movimientos) {
+    public Cuenta(Long id, String nombre, BigDecimal saldo, TipoCuenta tipoCuenta,
+                  Boolean activa, Usuario usuario, List<Movimiento> movimientos) {
         this.id = id;
         this.nombre = nombre;
         this.saldo = saldo;
+        this.tipoCuenta = tipoCuenta;
+        this.activa = activa;
         this.usuario = usuario;
         this.movimientos = movimientos;
     }
@@ -47,6 +58,14 @@ public class Cuenta {
 
     public BigDecimal getSaldo() {
         return saldo;
+    }
+
+    public TipoCuenta getTipoCuenta() {
+        return tipoCuenta;
+    }
+
+    public Boolean getActiva() {
+        return activa;
     }
 
     public Usuario getUsuario() {
@@ -67,6 +86,14 @@ public class Cuenta {
 
     public void setSaldo(BigDecimal saldo) {
         this.saldo = saldo;
+    }
+
+    public void setTipoCuenta(TipoCuenta tipoCuenta) {
+        this.tipoCuenta = tipoCuenta;
+    }
+
+    public void setActiva(Boolean activa) {
+        this.activa = activa;
     }
 
     public void setUsuario(Usuario usuario) {

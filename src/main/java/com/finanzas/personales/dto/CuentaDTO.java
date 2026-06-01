@@ -1,11 +1,14 @@
 package com.finanzas.personales.dto;
 
+import com.finanzas.personales.enums.TipoCuenta;
+
 import java.math.BigDecimal;
 
 public class CuentaDTO {
 
     private String nombre;
     private BigDecimal saldo;
+    private TipoCuenta tipoCuenta;
     private Long usuarioId;
 
     public CuentaDTO() {
@@ -33,5 +36,13 @@ public class CuentaDTO {
 
     public void setUsuarioId(Long usuarioId) {
         this.usuarioId = usuarioId;
+    }
+
+    public TipoCuenta getTipoCuenta() {
+        return tipoCuenta;
+    }
+
+    public void setTipoCuenta(TipoCuenta tipoCuenta) {
+        this.tipoCuenta = tipoCuenta;
     }
 }

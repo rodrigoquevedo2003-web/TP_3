@@ -21,12 +21,19 @@ public class CuentaService {
     }
 
     public Cuenta crearCuenta(CuentaDTO dto) {
+
         Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         Cuenta cuenta = new Cuenta();
+
         cuenta.setNombre(dto.getNombre());
         cuenta.setSaldo(dto.getSaldo());
+
+        cuenta.setTipoCuenta(dto.getTipoCuenta()); // acá
+
+        cuenta.setActiva(true); // acá
+
         cuenta.setUsuario(usuario);
 
         return cuentaRepository.save(cuenta);
