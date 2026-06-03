@@ -4,7 +4,6 @@ package com.finanzas.personales.service;
 import com.finanzas.personales.dto.AuthResponseDTO;
 import com.finanzas.personales.dto.LoginDTO;
 import com.finanzas.personales.dto.RegisterDTO;
-import com.finanzas.personales.model.Rol;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.repository.UsuarioRepository;
 import com.finanzas.personales.security.JwtService;
@@ -29,12 +28,11 @@ public class AuthService {
         usuario.setNombre(dto.getNombre());
         usuario.setEmail(dto.getEmail());
         usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
-        usuario.setRol(Rol.ROLE_USER);
 
         usuarioRepository.save(usuario);
 
-        String token = jwtService.generarToken(usuario.getEmail(), usuario.getRol().name());
-        return new AuthResponseDTO(token, usuario.getEmail(), usuario.getRol().name());
+        String token = jwtService.generarToken(usuario.getEmail());
+        return new AuthResponseDTO(token, usuario.getEmail());
     }
 
     public AuthResponseDTO login(LoginDTO dto) {
@@ -45,8 +43,8 @@ public class AuthService {
             throw new RuntimeException("Contraseña incorrecta");
         }
 
-        String token = jwtService.generarToken(usuario.getEmail(), usuario.getRol().name());
-        return new AuthResponseDTO(token, usuario.getEmail(), usuario.getRol().name());
+        String token = jwtService.generarToken(usuario.getEmail());
+        return new AuthResponseDTO(token, usuario.getEmail());
     }
 }
 
