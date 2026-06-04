@@ -6,6 +6,8 @@ import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.repository.CuentaRepository;
 import com.finanzas.personales.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
+import com.finanzas.personales.Exception.UsuarioNoEncontradoException;
+import com.finanzas.personales.Exception.CuentaNoEncontradaException;
 
 import java.util.List;
 
@@ -23,7 +25,7 @@ public class CuentaService {
     public Cuenta crearCuenta(CuentaDTO dto) {
 
         Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado"));
 
         Cuenta cuenta = new Cuenta();
 
@@ -45,7 +47,7 @@ public class CuentaService {
 
     public Cuenta buscarPorId(Long id) {
         return cuentaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
+                .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada"));
     }
 
     public List<Cuenta> listarPorUsuario(Long usuarioId) {

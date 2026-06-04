@@ -10,6 +10,9 @@ import com.finanzas.personales.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.finanzas.personales.Exception.EmailYaRegistradoException;
+import com.finanzas.personales.Exception.UsuarioNoEncontradoException;
+import com.finanzas.personales.Exception.CredencialesInvalidasException;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +24,7 @@ public class AuthService {
 
     public AuthResponseDTO registrar(RegisterDTO dto) {
         if (usuarioRepository.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("El email ya está registrado");
+            throw new EmailYaRegistradoException("El email ya está registrado");
         }
 
         Usuario usuario = new Usuario();
@@ -37,10 +40,10 @@ public class AuthService {
 
     public AuthResponseDTO login(LoginDTO dto) {
         Usuario usuario = usuarioRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado"));
 
         if (!passwordEncoder.matches(dto.getPassword(), usuario.getPassword())) {
-            throw new RuntimeException("Contraseña incorrecta");
+            throw new CredencialesInvalidasException("Contraseña incorrecta");
         }
 
         String token = jwtService.generarToken(usuario.getEmail());
