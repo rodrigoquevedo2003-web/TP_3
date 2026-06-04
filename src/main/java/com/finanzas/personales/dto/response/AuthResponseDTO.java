@@ -1,4 +1,4 @@
-package com.finanzas.personales.dto;
+package com.finanzas.personales.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
