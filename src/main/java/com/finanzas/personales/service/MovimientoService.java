@@ -8,7 +8,7 @@ import com.finanzas.personales.dto.MovimientoDTO;
 import com.finanzas.personales.model.Categoria;
 import com.finanzas.personales.model.Cuenta;
 import com.finanzas.personales.model.Movimiento;
-import com.finanzas.personales.model.TipoMovimiento;
+import com.finanzas.personales.enums.TipoMovimiento;
 import com.finanzas.personales.repository.CategoriaRepository;
 import com.finanzas.personales.repository.CuentaRepository;
 import com.finanzas.personales.repository.MovimientoRepository;

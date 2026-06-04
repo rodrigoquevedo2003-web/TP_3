@@ -1,6 +1,6 @@
 package com.finanzas.personales.dto;
 
-import com.finanzas.personales.model.TipoMovimiento;
+import com.finanzas.personales.enums.TipoMovimiento;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

@@ -1,5 +1,6 @@
 package com.finanzas.personales.model;
 
+import com.finanzas.personales.enums.TipoMovimiento;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;

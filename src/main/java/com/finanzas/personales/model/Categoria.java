@@ -1,8 +1,10 @@
 package com.finanzas.personales.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.finanzas.personales.enums.TipoMovimiento;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -21,9 +23,15 @@ public class Categoria {
     private Long id;
 
     @NotBlank
+    @Column(nullable = false)
     private String nombre;
 
     private String icono;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoMovimiento tipo;
 
     @OneToMany(mappedBy = "categoria")
     @JsonIgnore

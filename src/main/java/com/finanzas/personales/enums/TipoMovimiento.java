@@ -1,4 +1,4 @@
-package com.finanzas.personales.model;
+package com.finanzas.personales.enums;
 
 public enum TipoMovimiento {
     INGRESO,
