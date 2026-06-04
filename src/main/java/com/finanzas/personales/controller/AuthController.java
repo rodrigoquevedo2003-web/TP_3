@@ -1,6 +1,6 @@
 package com.finanzas.personales.controller;
 
-import com.finanzas.personales.dto.AuthResponseDTO;
+import com.finanzas.personales.dto.response.AuthResponseDTO;
 import com.finanzas.personales.dto.LoginDTO;
 import com.finanzas.personales.dto.RegisterDTO;
 import com.finanzas.personales.service.AuthService;
