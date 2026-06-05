@@ -9,7 +9,7 @@ public class CuentaDTO {
     private String nombre;
     private BigDecimal saldo;
     private TipoCuenta tipoCuenta;
-    private Long usuarioId;
+
 
     public CuentaDTO() {
     }

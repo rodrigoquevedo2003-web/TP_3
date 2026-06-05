@@ -1,59 +1,32 @@
 package com.finanzas.personales.controller;
 
+import com.finanzas.personales.dto.ActualizarUsuarioDTO;
+import com.finanzas.personales.dto.response.UsuarioResponseDTO;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.service.UsuarioService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/usuarios")
+@RequiredArgsConstructor
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
-    public UsuarioController(UsuarioService usuarioService) {
-        this.usuarioService = usuarioService;
-    }
-
-    @PostMapping
-    public String crearUsuario(@RequestBody Usuario usuario) {
-        usuarioService.crearUsuario(usuario);
-        return "Usuario creado correctamente";
-    }
-
-//    @PostMapping("/login")
-//    public Usuario login(@RequestBody LoginDTO loginDTO) {
-//
-//        return usuarioService.login(loginDTO);
-//    }
-//
-//    @PostMapping("/login")
-//    public String login(@RequestBody LoginDTO loginDTO, HttpSession session) {
-//
-//        Usuario usuario = usuarioService.login(loginDTO);
-//
-//        session.setAttribute("usuarioLogueado", usuario);
-//
-//        return "Sesión iniciada correctamente";
-//    }
-
     @GetMapping("/actual")
-    public Usuario usuarioActual(HttpSession session) {
-
-        Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
-
-        if (usuario == null) {
-            throw new RuntimeException("No hay usuario logueado");
-        }
-
-        return usuario;
+    public UsuarioResponseDTO usuarioActual(@AuthenticationPrincipal Usuario usuario) {
+        return new UsuarioResponseDTO(usuario.getId(), usuario.getNombre(), usuario.getEmail());
     }
 
-    @PostMapping("/logout")
-    public String logout(HttpSession session) {
 
-        session.invalidate();
-
-        return "Sesión cerrada correctamente";
+    @PutMapping("/actual")
+    public UsuarioResponseDTO actualizarPerfil(@AuthenticationPrincipal Usuario usuario,
+                                               @Valid @RequestBody ActualizarUsuarioDTO dto) {
+        Usuario actualizado = usuarioService.actualizarPerfil(usuario.getEmail(), dto.getNombre());
+        return new UsuarioResponseDTO(actualizado.getId(), actualizado.getNombre(), actualizado.getEmail());
     }
 }

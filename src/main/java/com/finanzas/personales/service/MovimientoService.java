@@ -1,7 +1,14 @@
 package com.finanzas.personales.service;
 
+import com.finanzas.personales.Exception.CategoriaNoEncontradaException;
+import com.finanzas.personales.Exception.CuentaNoEncontradaException;
+import com.finanzas.personales.Exception.MovimientoNoEncontradoException;
+import com.finanzas.personales.Exception.SaldoInsuficienteException;
 import com.finanzas.personales.dto.MovimientoDTO;
-import com.finanzas.personales.model.*;
+import com.finanzas.personales.model.Categoria;
+import com.finanzas.personales.model.Cuenta;
+import com.finanzas.personales.model.Movimiento;
+import com.finanzas.personales.enums.TipoMovimiento;
 import com.finanzas.personales.repository.CategoriaRepository;
 import com.finanzas.personales.repository.CuentaRepository;
 import com.finanzas.personales.repository.MovimientoRepository;
@@ -29,16 +36,11 @@ public class MovimientoService {
     public Movimiento crearMovimiento(MovimientoDTO dto) {
 
         Cuenta cuenta = cuentaRepository.findById(dto.getCuentaId())
-                .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
+                .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada"));
 
         Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
+                .orElseThrow(() -> new CategoriaNoEncontradaException("Categoria no encontrada"));
 
-        if(dto.getTipo() == TipoMovimiento.EGRESO &&
-                cuenta.getSaldo().compareTo(dto.getMonto()) < 0) {
-            throw new RuntimeException("Saldo insuficiente");
-        }
-        
         Movimiento movimiento = new Movimiento();
         movimiento.setCuenta(cuenta);
         movimiento.setCategoria(categoria);
@@ -51,6 +53,9 @@ public class MovimientoService {
         if (dto.getTipo() == TipoMovimiento.INGRESO) {
             cuenta.setSaldo(cuenta.getSaldo().add(dto.getMonto()));
         } else if (dto.getTipo() == TipoMovimiento.EGRESO) {
+            if (cuenta.getSaldo().compareTo(dto.getMonto()) < 0) {
+                throw new SaldoInsuficienteException("Saldo insuficiente en la cuenta");
+            }
             cuenta.setSaldo(cuenta.getSaldo().subtract(dto.getMonto()));
         } else {
             throw new RuntimeException("Tipo de movimiento inválido");
@@ -67,7 +72,7 @@ public class MovimientoService {
 
     public Movimiento buscarPorId(Long id) {
         return movimientoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Movimiento no encontrado"));
+                .orElseThrow(() -> new MovimientoNoEncontradoException("Movimiento no encontrado"));
     }
 
     public List<Movimiento> listarPorCuenta(Long cuentaId) {
