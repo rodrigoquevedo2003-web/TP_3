@@ -1,28 +1,53 @@
 package com.finanzas.personales.controller;
 
+import com.finanzas.personales.dto.request.CategoriaRequestDTO;
+import com.finanzas.personales.dto.response.CategoriaResponseDTO;
+import com.finanzas.personales.enums.TipoMovimiento;
 import com.finanzas.personales.model.Categoria;
 import com.finanzas.personales.service.CategoriaService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/categorias")
+@RequiredArgsConstructor
 public class CategoriaController {
 
     private final CategoriaService categoriaService;
 
-    public CategoriaController(CategoriaService categoriaService) {
-        this.categoriaService = categoriaService;
+    @PostMapping
+    public ResponseEntity<CategoriaResponseDTO> crear(@Valid @RequestBody CategoriaRequestDTO dto){
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoriaService.crear(dto));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CategoriaResponseDTO> actualizar(@PathVariable Long id, @Valid @RequestBody CategoriaRequestDTO dto) {
+        return ResponseEntity.ok(categoriaService.actualizar(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        categoriaService.eliminar(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
-    public List<Categoria> listarTodas() {
-        return categoriaService.listarTodas();
+    public ResponseEntity<List<CategoriaResponseDTO>> listar(
+            @RequestParam(required = false) TipoMovimiento tipo) {
+
+        if (tipo != null) {
+            return ResponseEntity.ok(categoriaService.listarPorTipo(tipo));
+        }
+        return ResponseEntity.ok(categoriaService.listar());
     }
 
-    @GetMapping("/tipo/{tipo}")
-    public List<Categoria> listarPorTipo(@PathVariable String tipo) {
-        return categoriaService.listarPorTipo(tipo);
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoriaResponseDTO> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(categoriaService.buscarPorId(id));
     }
 }

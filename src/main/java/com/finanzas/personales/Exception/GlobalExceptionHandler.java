@@ -27,6 +27,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler(CategoriaEnUsoException.class)
+    public ResponseEntity<Map<String, Object>> handleCategoriaEnUso(CategoriaEnUsoException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     @ExceptionHandler(EmailYaRegistradoException.class)
     public ResponseEntity<Map<String, Object>> handleEmailDuplicado(EmailYaRegistradoException ex) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
