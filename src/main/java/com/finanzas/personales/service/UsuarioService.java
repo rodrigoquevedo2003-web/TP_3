@@ -2,7 +2,6 @@ package com.finanzas.personales.service;
 
 
 import com.finanzas.personales.Exception.UsuarioNoEncontradoException;
-import com.finanzas.personales.dto.LoginDTO;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
