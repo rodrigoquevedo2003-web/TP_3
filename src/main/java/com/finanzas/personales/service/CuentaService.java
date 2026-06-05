@@ -1,5 +1,6 @@
 package com.finanzas.personales.service;
 
+import com.finanzas.personales.Exception.*;
 import com.finanzas.personales.dto.CuentaDTO;
 import com.finanzas.personales.dto.request.TransferenciaDTO;
 import com.finanzas.personales.enums.TipoCuenta;
@@ -9,8 +10,6 @@ import com.finanzas.personales.repository.CuentaRepository;
 import com.finanzas.personales.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.finanzas.personales.Exception.UsuarioNoEncontradoException;
-import com.finanzas.personales.Exception.CuentaNoEncontradaException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -23,10 +22,7 @@ public class CuentaService {
     private final UsuarioRepository usuarioRepository;
 
 
-    public Cuenta crearCuenta(CuentaDTO dto) {
-
-        Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    public Cuenta crearCuenta(CuentaDTO dto, Usuario usuario) {
 
         if (dto.getTipoCuenta() == TipoCuenta.EFECTIVO) {
 
@@ -37,7 +33,7 @@ public class CuentaService {
                     );
 
             if (existeEfectivo) {
-                throw new RuntimeException(
+                throw new CuentaEfectivoExistenteException(
                         "El usuario ya tiene una cuenta de efectivo"
                 );
             }
@@ -83,6 +79,13 @@ public class CuentaService {
 
     public void eliminarCuenta(Long id, Long usuarioId) {
         Cuenta cuenta = buscarPropia(id, usuarioId);
+
+        if (cuenta.getTipoCuenta() == TipoCuenta.EFECTIVO) {
+            throw new CuentaEfectivoNoEliminableException(
+                    "La cuenta de efectivo no se puede eliminar"
+            );
+        }
+
         cuentaRepository.delete(cuenta);
     }
 
@@ -90,22 +93,17 @@ public class CuentaService {
     public void transferir(TransferenciaDTO dto) {
 
         Cuenta origen = cuentaRepository.findById(dto.getCuentaOrigenId())
-                .orElseThrow(() -> new RuntimeException("Cuenta origen no encontrada"));
+                .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta origen no encontrada"));
 
         Cuenta destino = cuentaRepository.findById(dto.getCuentaDestinoId())
-                .orElseThrow(() -> new RuntimeException("Cuenta destino no encontrada"));
+                .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta destino no encontrada"));
 
         if (origen.getSaldo().compareTo(dto.getMonto()) < 0) {
-            throw new RuntimeException("Saldo insuficiente");
+            throw new SaldoInsuficienteException("Saldo insuficiente");
         }
 
-        origen.setSaldo(
-                origen.getSaldo().subtract(dto.getMonto())
-        );
-
-        destino.setSaldo(
-                destino.getSaldo().add(dto.getMonto())
-        );
+        origen.setSaldo(origen.getSaldo().subtract(dto.getMonto()));
+        destino.setSaldo(destino.getSaldo().add(dto.getMonto()));
 
         cuentaRepository.save(origen);
         cuentaRepository.save(destino);
