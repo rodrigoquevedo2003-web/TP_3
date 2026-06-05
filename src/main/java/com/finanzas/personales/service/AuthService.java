@@ -1,10 +1,16 @@
 package com.finanzas.personales.service;
+import com.finanzas.personales.model.Cuenta;
+import com.finanzas.personales.repository.CuentaRepository;
+import com.finanzas.personales.enums.TipoCuenta;
+
+import java.math.BigDecimal;
 
 
 import com.finanzas.personales.dto.response.AuthResponseDTO;
 import com.finanzas.personales.dto.LoginDTO;
 import com.finanzas.personales.dto.RegisterDTO;
 import com.finanzas.personales.model.Usuario;
+import com.finanzas.personales.repository.CuentaRepository;
 import com.finanzas.personales.repository.UsuarioRepository;
 import com.finanzas.personales.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +27,7 @@ public class AuthService {
     private final UsuarioRepository usuarioRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final CuentaRepository cuentaRepository;
 
     public AuthResponseDTO registrar(RegisterDTO dto) {
         if (usuarioRepository.existsByEmail(dto.getEmail())) {
@@ -33,6 +40,15 @@ public class AuthService {
         usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         usuarioRepository.save(usuario);
+
+        Cuenta cuentaEfectivo = new Cuenta();
+        cuentaEfectivo.setNombre("Efectivo");
+        cuentaEfectivo.setSaldo(BigDecimal.ZERO);
+        cuentaEfectivo.setTipoCuenta(TipoCuenta.EFECTIVO);
+        cuentaEfectivo.setActiva(true);
+        cuentaEfectivo.setUsuario(usuario);
+
+        cuentaRepository.save(cuentaEfectivo);
 
         String token = jwtService.generarToken(usuario.getEmail());
         return new AuthResponseDTO(token, usuario.getEmail());
