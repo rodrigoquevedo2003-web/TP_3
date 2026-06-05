@@ -15,6 +15,9 @@ public class MovimientoDTO {
     private LocalDate fecha;
     private Boolean esFamiliar;
 
+    public MovimientoDTO() {
+    }
+
     public Long getCuentaId() {
         return cuentaId;
     }
@@ -70,4 +73,4 @@ public class MovimientoDTO {
     public void setEsFamiliar(Boolean esFamiliar) {
         this.esFamiliar = esFamiliar;
     }
-}
+}   

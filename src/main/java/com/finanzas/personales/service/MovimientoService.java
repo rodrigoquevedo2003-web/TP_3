@@ -1,10 +1,7 @@
 package com.finanzas.personales.service;
 
 import com.finanzas.personales.dto.MovimientoDTO;
-import com.finanzas.personales.model.Categoria;
-import com.finanzas.personales.model.Cuenta;
-import com.finanzas.personales.model.Movimiento;
-import com.finanzas.personales.model.TipoMovimiento;
+import com.finanzas.personales.model.*;
 import com.finanzas.personales.repository.CategoriaRepository;
 import com.finanzas.personales.repository.CuentaRepository;
 import com.finanzas.personales.repository.MovimientoRepository;
@@ -35,8 +32,13 @@ public class MovimientoService {
                 .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
 
         Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
-                .orElseThrow(() -> new RuntimeException("Categoria no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
 
+        if(dto.getTipo() == TipoMovimiento.EGRESO &&
+                cuenta.getSaldo().compareTo(dto.getMonto()) < 0) {
+            throw new RuntimeException("Saldo insuficiente");
+        }
+        
         Movimiento movimiento = new Movimiento();
         movimiento.setCuenta(cuenta);
         movimiento.setCategoria(categoria);

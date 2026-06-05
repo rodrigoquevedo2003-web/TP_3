@@ -1,8 +1,7 @@
 package com.finanzas.personales.model;
 
 import jakarta.persistence.*;
-import org.springframework.data.annotation.Id;
-
+import jakarta.persistence.Id;
 import java.math.BigDecimal;
 
 @Entity

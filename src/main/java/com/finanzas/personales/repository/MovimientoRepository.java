@@ -12,4 +12,6 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Long> {
     List<Movimiento> findByCuentaId(Long cuentaId);
 
     List<Movimiento> findByCategoriaId(Long categoriaId);
+
+
 }

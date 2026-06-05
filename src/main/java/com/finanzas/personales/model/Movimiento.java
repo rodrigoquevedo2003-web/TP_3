@@ -13,8 +13,6 @@ public class Movimiento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
-
     @ManyToOne
     @JoinColumn(name = "cuenta_id", nullable = false)
     private Cuenta cuenta;
