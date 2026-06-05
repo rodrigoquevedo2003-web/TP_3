@@ -1,6 +1,7 @@
 package com.finanzas.personales.service;
 
 import com.finanzas.personales.dto.CuentaDTO;
+import com.finanzas.personales.dto.request.TransferenciaDTO;
 import com.finanzas.personales.model.Cuenta;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.repository.CuentaRepository;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.finanzas.personales.Exception.UsuarioNoEncontradoException;
 import com.finanzas.personales.Exception.CuentaNoEncontradaException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -59,5 +61,30 @@ public class CuentaService {
     public void eliminarCuenta(Long id, Long usuarioId) {
         Cuenta cuenta = buscarPropia(id, usuarioId);
         cuentaRepository.delete(cuenta);
+    }
+
+    @Transactional
+    public void transferir(TransferenciaDTO dto) {
+
+        Cuenta origen = cuentaRepository.findById(dto.getCuentaOrigenId())
+                .orElseThrow(() -> new RuntimeException("Cuenta origen no encontrada"));
+
+        Cuenta destino = cuentaRepository.findById(dto.getCuentaDestinoId())
+                .orElseThrow(() -> new RuntimeException("Cuenta destino no encontrada"));
+
+        if (origen.getSaldo().compareTo(dto.getMonto()) < 0) {
+            throw new RuntimeException("Saldo insuficiente");
+        }
+
+        origen.setSaldo(
+                origen.getSaldo().subtract(dto.getMonto())
+        );
+
+        destino.setSaldo(
+                destino.getSaldo().add(dto.getMonto())
+        );
+
+        cuentaRepository.save(origen);
+        cuentaRepository.save(destino);
     }
 }

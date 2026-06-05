@@ -1,6 +1,7 @@
 package com.finanzas.personales.controller;
 
 import com.finanzas.personales.dto.CuentaDTO;
+import com.finanzas.personales.dto.request.TransferenciaDTO;
 import com.finanzas.personales.model.Cuenta;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.service.CuentaService;
@@ -43,5 +44,13 @@ public class CuentaController {
     @DeleteMapping("/{id}")
     public void eliminarCuenta(@PathVariable Long id,  @AuthenticationPrincipal Usuario usuario) {
         cuentaService.eliminarCuenta(id, usuario.getId());
+    }
+
+    @PostMapping("/transferir")
+    public String transferir(@RequestBody TransferenciaDTO dto) {
+
+        cuentaService.transferir(dto);
+
+        return "Transferencia realizada correctamente";
     }
 }
