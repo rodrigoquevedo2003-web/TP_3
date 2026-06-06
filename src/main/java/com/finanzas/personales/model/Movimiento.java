@@ -38,7 +38,6 @@ public class Movimiento {
     @Column(nullable = false)
     private TipoMovimiento tipo;
 
-    @Column(nullable = false)
     private String descripcion;
 
     @NotNull

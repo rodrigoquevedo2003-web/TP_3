@@ -181,7 +181,7 @@ public class MetaAhorroService {
     private Cuenta resolverCuenta(Long cuentaIdDto, MetaAhorro meta, Long usuarioId){
         if(cuentaIdDto != null){
             Cuenta cuenta = cuentaRepository.findById(cuentaIdDto)
-                    .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
+                    .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada"));
             validarCuentaDelUsuario(cuenta, usuarioId);
             return cuenta;
         }
