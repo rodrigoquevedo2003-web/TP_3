@@ -33,10 +33,14 @@ public class MovimientoService {
     }
 
     @Transactional
-    public Movimiento crearMovimiento(MovimientoDTO dto) {
+    public Movimiento crearMovimiento(MovimientoDTO dto, Long usuarioId) {
 
         Cuenta cuenta = cuentaRepository.findById(dto.getCuentaId())
                 .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada"));
+
+        if (!cuenta.getUsuario().getId().equals(usuarioId)) {
+            throw new CuentaNoEncontradaException("La cuenta no pertenece al usuario");
+        }
 
         Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
                 .orElseThrow(() -> new CategoriaNoEncontradaException("Categoria no encontrada"));
@@ -83,8 +87,18 @@ public class MovimientoService {
         return movimientoRepository.findByCategoriaId(categoriaId);
     }
 
+    @Transactional
     public void eliminarMovimiento(Long id) {
         Movimiento movimiento = buscarPorId(id);
+        Cuenta cuenta = movimiento.getCuenta();
+
+        if (movimiento.getTipo() == TipoMovimiento.INGRESO) {
+            cuenta.setSaldo(cuenta.getSaldo().subtract(movimiento.getMonto()));
+        } else {
+            cuenta.setSaldo(cuenta.getSaldo().add(movimiento.getMonto()));
+        }
+
+        cuentaRepository.save(cuenta);
         movimientoRepository.delete(movimiento);
     }
 }

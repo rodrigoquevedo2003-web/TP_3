@@ -70,7 +70,7 @@ public class MetaAhorro {
          if(monto.compareTo(this.montoActual) > 0) {
              throw new IllegalStateException("No hay suficiente saldo en la meta para retirar ese monto");
          }
-         this.montoActual = this.montoActual.add(monto);
+         this.montoActual = this.montoActual.subtract(monto);
 
          if(this.cumplida && this.montoActual.compareTo(this.montoObjetivo) < 0){
              this.cumplida = false;

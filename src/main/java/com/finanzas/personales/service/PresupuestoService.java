@@ -44,7 +44,6 @@ public class PresupuestoService {
 
         p.setAnio(presupuesto.getAnio());
         p.setCategoria(presupuesto.getCategoria());
-        p.setAnio(presupuesto.getAnio());
         p.setMes(presupuesto.getMes());
         p.setUsuario(presupuesto.getUsuario());
         p.setMontoConsumido(presupuesto.getMontoConsumido());

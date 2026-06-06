@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 
 public class CuentaDTO {
 
+    private Long usuarioId;
     private String nombre;
     private BigDecimal saldo;
     private TipoCuenta tipoCuenta;

@@ -17,9 +17,9 @@ public class MovimientoController {
         this.movimientoService = movimientoService;
     }
 
-    @PostMapping
-    public Movimiento crearMovimiento(@RequestBody MovimientoDTO dto) {
-        return movimientoService.crearMovimiento(dto);
+    @PostMapping("/crearmovimiento/{usuarioId}")
+    public Movimiento crearMovimiento(@RequestBody MovimientoDTO dto, @PathVariable Long usuarioId) {
+        return movimientoService.crearMovimiento(dto, usuarioId);
     }
 
     @GetMapping
