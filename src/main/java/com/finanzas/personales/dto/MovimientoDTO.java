@@ -1,76 +1,31 @@
 package com.finanzas.personales.dto;
 
 import com.finanzas.personales.enums.TipoMovimiento;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@Data
 public class MovimientoDTO {
 
-    private Long cuentaId;
-    private Long categoriaId;
-    private TipoMovimiento tipo;
-    private String descripcion;
-    private BigDecimal monto;
-    private LocalDate fecha;
-    private Boolean esFamiliar;
+        @NotNull(message = "La cuenta es obligatoria")
+        private Long cuentaId;
 
-    public MovimientoDTO() {
-    }
+        @NotNull(message = "La categoria es obligatoria")
+        private Long categoriaId;
 
-    public Long getCuentaId() {
-        return cuentaId;
-    }
+        @NotNull(message = "El tipo de movimiento es obligatorio")
+        private TipoMovimiento tipo;
 
-    public void setCuentaId(Long cuentaId) {
-        this.cuentaId = cuentaId;
-    }
+        private String descripcion;
 
-    public Long getCategoriaId() {
-        return categoriaId;
-    }
+        @NotNull(message = "El monto es obligatorio")
+        @DecimalMin(value = "0.01", message = "El monto debe ser mayor a cero")
+        private BigDecimal monto;
 
-    public void setCategoriaId(Long categoriaId) {
-        this.categoriaId = categoriaId;
-    }
+        private LocalDate fecha;
 
-    public TipoMovimiento getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(TipoMovimiento tipo) {
-        this.tipo = tipo;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public BigDecimal getMonto() {
-        return monto;
-    }
-
-    public void setMonto(BigDecimal monto) {
-        this.monto = monto;
-    }
-
-    public LocalDate getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
-    }
-
-    public Boolean getEsFamiliar() {
-        return esFamiliar;
-    }
-
-    public void setEsFamiliar(Boolean esFamiliar) {
-        this.esFamiliar = esFamiliar;
-    }
 }   

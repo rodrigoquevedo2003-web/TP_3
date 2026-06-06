@@ -33,7 +33,7 @@ public class Movimiento {
     @JsonIgnoreProperties({"movimientos", "usuario"})
     private Categoria categoria;
 
-     @NotNull
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TipoMovimiento tipo;
