@@ -35,32 +35,34 @@ public class CategoriaService {
         return CategoriaResponseDTO.from(categoriaRepository.save(categoria));
     }
 
-    public List<CategoriaResponseDTO> listar(){
-        return categoriaRepository.findAll()
+    public List<CategoriaResponseDTO> listar(Long usuarioId){
+        return categoriaRepository.findByUsuarioId(usuarioId)
                 .stream()
                 .map(CategoriaResponseDTO::from)
                 .toList();
     }
 
-    public List<CategoriaResponseDTO> listarPorTipo(TipoMovimiento tipo){
-        return categoriaRepository.findByTipo(tipo)
+    public List<CategoriaResponseDTO> listarPorTipo(Long usuarioId, TipoMovimiento tipo){
+        return categoriaRepository.findByUsuarioIdAndTipo(usuarioId, tipo)
                 .stream()
                 .map(CategoriaResponseDTO::from)
                 .toList();
     }
 
-    public CategoriaResponseDTO buscarPorId(Long id){
+    public CategoriaResponseDTO buscarPorId(Long id, Long usuarioId){
         Categoria categoria = obtenerOLanzar(id);
+        verificarPropietario(categoria, usuarioId);
         return CategoriaResponseDTO.from(categoria);
     }
 
     @Transactional
-    public CategoriaResponseDTO actualizar(Long id, CategoriaRequestDTO dto){
+    public CategoriaResponseDTO actualizar(Long id, CategoriaRequestDTO dto, Long usuarioId){
         Categoria categoria = obtenerOLanzar(id);
+        verificarPropietario(categoria, usuarioId);
 
         boolean nombreCambio = !categoria.getNombre().equalsIgnoreCase(dto.getNombre());
 
-        if(nombreCambio && categoriaRepository.existsByNombreIgnoreCase(dto.getNombre())){
+        if(nombreCambio && categoriaRepository.existsByUsuarioIdAndNombreIgnoreCase(usuarioId, dto.getNombre())){
             throw new RuntimeException("Ya existe una categoria con ese nombre");
         }
 
@@ -73,8 +75,9 @@ public class CategoriaService {
 
 
     @Transactional
-    public void eliminar(Long id){
+    public void eliminar(Long id, Long usuarioId){
         Categoria categoria = obtenerOLanzar(id);
+        verificarPropietario(categoria, usuarioId);
 
         if(categoria.getMovimientos() != null && !categoria.getMovimientos().isEmpty()){
             throw new CategoriaEnUsoException("No se puede eliminar la categoria porque tiene " + categoria.getMovimientos().size() + " movimientos asociados. Reasigna los movimientos a otra categoria para eliminar " + categoria.getNombre());
@@ -83,12 +86,15 @@ public class CategoriaService {
         categoriaRepository.delete(categoria);
     }
 
-    public Categoria obtenerEntidadOLanzar(Long id){
-        return obtenerOLanzar(id);
-    }
 
     private Categoria obtenerOLanzar(Long id){
         return categoriaRepository.findById(id)
                 .orElseThrow(() -> new CategoriaNoEncontradaException("Categoria no encontrada"));
+    }
+
+    private void verificarPropietario(Categoria categoria, Long usuarioId){
+        if(categoria.getUsuario() == null || !categoria.getUsuario().getId().equals(usuarioId)){
+            throw new CategoriaNoEncontradaException("Categoria no encontrada");
+        }
     }
 }

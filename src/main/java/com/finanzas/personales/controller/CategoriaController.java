@@ -29,23 +29,27 @@ public class CategoriaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoriaResponseDTO> actualizar(@PathVariable Long id, @Valid @RequestBody CategoriaRequestDTO dto) {
-        return ResponseEntity.ok(categoriaService.actualizar(id, dto));
+    public ResponseEntity<CategoriaResponseDTO> actualizar(@PathVariable Long id, @Valid @RequestBody CategoriaRequestDTO dto, @AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(categoriaService.actualizar(id, dto, usuario.getId()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        categoriaService.eliminar(id);
+    public ResponseEntity<Void> eliminar(@PathVariable Long id ,@AuthenticationPrincipal Usuario usuario) {
+        categoriaService.eliminar(id, usuario.getId());
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoriaResponseDTO>> listar(
-            @RequestParam(required = false) TipoMovimiento tipo) {
+    public ResponseEntity<List<CategoriaResponseDTO>> listar(@RequestParam(required = false) TipoMovimiento tipo, @AuthenticationPrincipal Usuario usuario) {
 
         if (tipo != null) {
-            return ResponseEntity.ok(categoriaService.listarPorTipo(tipo));
+            return ResponseEntity.ok(categoriaService.listarPorTipo(usuario.getId(), tipo));
         }
-        return ResponseEntity.ok(categoriaService.listar());
+        return ResponseEntity.ok(categoriaService.listar(usuario.getId()));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoriaResponseDTO> buscarPorId(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario){
+        return ResponseEntity.ok(categoriaService.buscarPorId(id, usuario.getId()));
     }
 }
