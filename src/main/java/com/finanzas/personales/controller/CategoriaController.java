@@ -23,8 +23,9 @@ public class CategoriaController {
     private final CategoriaService categoriaService;
 
     @PostMapping
-    public ResponseEntity<CategoriaResponseDTO> crear(@Valid @RequestBody CategoriaRequestDTO dto){
-        return ResponseEntity.status(HttpStatus.CREATED).body(categoriaService.crear(dto));
+    public ResponseEntity<CategoriaResponseDTO> crear(@Valid @RequestBody CategoriaRequestDTO dto, @AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(categoriaService.crear(dto, usuario));
     }
 
     @PutMapping("/{id}")
@@ -46,14 +47,5 @@ public class CategoriaController {
             return ResponseEntity.ok(categoriaService.listarPorTipo(tipo));
         }
         return ResponseEntity.ok(categoriaService.listar());
-    }
-
-    @PostMapping
-    public ResponseEntity<CategoriaResponseDTO> crear(
-            @Valid @RequestBody CategoriaRequestDTO dto,
-            @AuthenticationPrincipal Usuario usuario) {
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(categoriaService.crear(dto, usuario));
     }
 }
