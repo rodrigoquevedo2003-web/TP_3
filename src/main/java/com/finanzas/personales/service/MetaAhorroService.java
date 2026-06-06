@@ -156,7 +156,6 @@ public class MetaAhorroService {
         movimiento.setDescripcion(descripcion);
         movimiento.setMonto(monto);
         movimiento.setFecha(LocalDate.now());
-        movimiento.setEsFamiliar(false);
 
         movimientoRepository.save(movimiento);
     }
