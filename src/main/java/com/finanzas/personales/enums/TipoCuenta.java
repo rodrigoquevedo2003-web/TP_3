@@ -4,5 +4,6 @@ public enum TipoCuenta {
     EFECTIVO,
     BANCO,
     BILLETERA_VIRTUAL,
-    AHORRO
+    INVERSION,
+    TARJETA_CREDITO
 }

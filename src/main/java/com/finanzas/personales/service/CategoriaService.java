@@ -6,6 +6,7 @@ import com.finanzas.personales.dto.request.CategoriaRequestDTO;
 import com.finanzas.personales.dto.response.CategoriaResponseDTO;
 import com.finanzas.personales.enums.TipoMovimiento;
 import com.finanzas.personales.model.Categoria;
+import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.repository.CategoriaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,8 @@ public class CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
 
-    @Transactional
-    public CategoriaResponseDTO crear(CategoriaRequestDTO dto){
-        if(categoriaRepository.existsByNombreIgnoreCase(dto.getNombre())){
+    public CategoriaResponseDTO crear(CategoriaRequestDTO dto, Usuario usuario){
+        if(categoriaRepository.existsByUsuarioIdAndNombreIgnoreCase(usuario.getId(), dto.getNombre())){
             throw new RuntimeException("Ya existe una categoria con ese nombre");
         }
 
@@ -29,6 +29,8 @@ public class CategoriaService {
         categoria.setNombre(dto.getNombre());
         categoria.setIcono(dto.getIcono());
         categoria.setTipo(dto.getTipo());
+        categoria.setEsDefault(false);
+        categoria.setUsuario(usuario);
 
         return CategoriaResponseDTO.from(categoriaRepository.save(categoria));
     }

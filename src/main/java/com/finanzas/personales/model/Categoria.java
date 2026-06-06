@@ -33,6 +33,13 @@ public class Categoria {
     @Column(nullable = false)
     private TipoMovimiento tipo;
 
+    @Column(nullable = false)
+    private Boolean esDefault = false;
+
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
+
     @OneToMany(mappedBy = "categoria")
     @JsonIgnore
     private List<Movimiento> movimientos;

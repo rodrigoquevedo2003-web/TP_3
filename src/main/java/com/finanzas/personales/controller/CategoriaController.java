@@ -4,11 +4,13 @@ import com.finanzas.personales.dto.request.CategoriaRequestDTO;
 import com.finanzas.personales.dto.response.CategoriaResponseDTO;
 import com.finanzas.personales.enums.TipoMovimiento;
 import com.finanzas.personales.model.Categoria;
+import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.service.CategoriaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,8 +48,12 @@ public class CategoriaController {
         return ResponseEntity.ok(categoriaService.listar());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CategoriaResponseDTO> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(categoriaService.buscarPorId(id));
+    @PostMapping
+    public ResponseEntity<CategoriaResponseDTO> crear(
+            @Valid @RequestBody CategoriaRequestDTO dto,
+            @AuthenticationPrincipal Usuario usuario) {
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(categoriaService.crear(dto, usuario));
     }
 }
