@@ -70,29 +70,46 @@ public class MovimientoService {
         return movimientoRepository.save(movimiento);
     }
 
-    public List<Movimiento> listarMovimientos() {
+  /*  public List<Movimiento> listarMovimientos() {
         return movimientoRepository.findAll();
+    }*/
+
+    public List<Movimiento> listarMovimientosPorUsuario(Long usuarioId) {
+        return movimientoRepository.findByCuentaUsuarioId(usuarioId);
     }
 
-    public Movimiento buscarPorId(Long id) {
+    public Movimiento buscarPorIdYUsuario(Long id, Long usuarioId) {
         return movimientoRepository.findById(id)
-                .orElseThrow(() -> new MovimientoNoEncontradoException("Movimiento no encontrado"));
+                .filter(m -> m.getCuenta().getUsuario().getId().equals(usuarioId))
+                .orElseThrow(() -> new MovimientoNoEncontradoException("Movimiento no encontrado o no autorizado"));
     }
 
-    public List<Movimiento> listarPorCuenta(Long cuentaId) {
-        return movimientoRepository.findByCuentaId(cuentaId);
+    public List<Movimiento> listarPorCuentaYUsuario(Long cuentaId, Long usuarioId) {
+
+        Cuenta cuenta = cuentaRepository.findByIdAndUsuarioId(cuentaId, usuarioId)
+                .orElseThrow(() -> new RuntimeException("Cuenta no encontrada o no pertenece a este usuario"));
+
+        return movimientoRepository.findByCuentaId(cuenta.getId());
     }
 
-    public List<Movimiento> listarPorCategoria(Long categoriaId) {
-        return movimientoRepository.findByCategoriaId(categoriaId);
+    public List<Movimiento> listarPorCategoriaYUsuario(Long categoriaId, Long usuarioId) {
+
+        return movimientoRepository.findByCategoriaIdAndCuentaUsuarioId(categoriaId, usuarioId);
     }
 
     @Transactional
-    public void eliminarMovimiento(Long id) {
-        Movimiento movimiento = buscarPorId(id);
+    public void eliminarMovimiento(Long id, Long usuarioId) {
+
+        Movimiento movimiento = buscarPorIdYUsuario(id, usuarioId);
         Cuenta cuenta = movimiento.getCuenta();
 
         if (movimiento.getTipo() == TipoMovimiento.INGRESO) {
+
+            if (cuenta.getSaldo().compareTo(movimiento.getMonto()) < 0) {
+                throw new SaldoInsuficienteException(
+                        "No se puede eliminar el ingreso: el saldo actual es menor al monto del movimiento"
+                );
+            }
             cuenta.setSaldo(cuenta.getSaldo().subtract(movimiento.getMonto()));
         } else {
             cuenta.setSaldo(cuenta.getSaldo().add(movimiento.getMonto()));
