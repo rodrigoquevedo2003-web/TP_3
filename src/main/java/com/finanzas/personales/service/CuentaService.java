@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -72,7 +73,10 @@ public class CuentaService {
         Cuenta cuenta = buscarPropia(id, usuarioId);
 
         cuenta.setNombre(cuentaActualizada.getNombre());
-        cuenta.setSaldo(cuentaActualizada.getSaldo());
+
+        if (cuenta.getTipoCuenta() != TipoCuenta.EFECTIVO) {
+            cuenta.setTipoCuenta(cuentaActualizada.getTipoCuenta());
+        }
 
         return cuentaRepository.save(cuenta);
     }
@@ -90,10 +94,28 @@ public class CuentaService {
     }
 
     @Transactional
-    public void transferir(TransferenciaDTO dto) {
+    public void transferir(TransferenciaDTO dto, Long usuarioId) {
+
+        if (dto.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new TransferenciaInvalidaException(
+                    "El monto debe ser mayor a cero"
+            );
+        }
+
+        if (dto.getCuentaOrigenId().equals(dto.getCuentaDestinoId())) {
+            throw new TransferenciaInvalidaException(
+                    "No se puede transferir a la misma cuenta"
+            );
+        }
 
         Cuenta origen = cuentaRepository.findById(dto.getCuentaOrigenId())
                 .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta origen no encontrada"));
+
+        if (!origen.getUsuario().getId().equals(usuarioId)) {
+            throw new CuentaNoEncontradaException(
+                    "La cuenta origen no pertenece al usuario"
+            );
+        }
 
         Cuenta destino = cuentaRepository.findById(dto.getCuentaDestinoId())
                 .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta destino no encontrada"));

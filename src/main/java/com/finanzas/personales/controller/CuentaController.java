@@ -47,9 +47,10 @@ public class CuentaController {
     }
 
     @PostMapping("/transferir")
-    public String transferir(@RequestBody TransferenciaDTO dto) {
+    public String transferir(@RequestBody TransferenciaDTO dto,
+                             @AuthenticationPrincipal Usuario usuario) {
 
-        cuentaService.transferir(dto);
+        cuentaService.transferir(dto, usuario.getId());
 
         return "Transferencia realizada correctamente";
     }
