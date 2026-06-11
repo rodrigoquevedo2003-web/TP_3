@@ -36,7 +36,6 @@ public class Statement {
     @Column(precision = 10, scale = 2)
     private BigDecimal pagado = BigDecimal.ZERO;
 
-    @Enumerated(EnumType.STRING)
     private String estado; // ABIERTO, VENCIDO, PAGADO
 }
 
