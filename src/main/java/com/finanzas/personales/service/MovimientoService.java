@@ -113,8 +113,10 @@ public class MovimientoService {
             cuenta.setSaldo(cuenta.getSaldo().subtract(movimiento.getMonto()));
         } else {
             cuenta.setSaldo(cuenta.getSaldo().add(movimiento.getMonto()));
-            presupuestoService.revertirGasto(usuarioId, movimiento.getCategoria().getId(),
-                    movimiento.getFecha(), movimiento.getMonto());
+            if (movimiento.getCategoria() != null) {
+                presupuestoService.revertirGasto(usuarioId, movimiento.getCategoria().getId(),
+                        movimiento.getFecha(), movimiento.getMonto());
+            }
         }
 
         cuentaRepository.save(cuenta);
@@ -128,12 +130,12 @@ public class MovimientoService {
         Cuenta cuentaAnterior = movimiento.getCuenta();
 
         TipoMovimiento tipoAnterior = movimiento.getTipo();
-        Long categoriaAnteriorId = movimiento.getCategoria().getId();
+        Long categoriaAnteriorId = movimiento.getCategoria() != null ? movimiento.getCategoria().getId() : null;
         LocalDate fechaAnterior = movimiento.getFecha();
         BigDecimal montoAnterior = movimiento.getMonto();
 
 
-        if (movimiento.getTipo() == TipoMovimiento.INGRESO) {
+        if (movimiento.getTipo() == TipoMovimiento.INGRESO && categoriaAnteriorId != null) {
             if (cuentaAnterior.getSaldo().compareTo(movimiento.getMonto()) < 0) {
                 throw new SaldoInsuficienteException("No se puede modificar: el saldo actual es menor al monto del movimiento original");
             }
@@ -184,4 +186,17 @@ public class MovimientoService {
         cuentaRepository.save(cuentaNueva);
         return movimientoRepository.save(movimiento);
     }
+
+    @Transactional
+    public void registrarMovimientoInterno(Cuenta cuenta, TipoMovimiento tipo, String descripcion, BigDecimal monto) {
+        Movimiento movimiento = new Movimiento();
+        movimiento.setCuenta(cuenta);
+        movimiento.setCategoria(null);
+        movimiento.setTipo(tipo);
+        movimiento.setDescripcion(descripcion);
+        movimiento.setMonto(monto);
+        movimiento.setFecha(LocalDate.now());
+        movimientoRepository.save(movimiento);
+    }
+
 }

@@ -4,6 +4,7 @@ import com.finanzas.personales.Exception.*;
 import com.finanzas.personales.dto.CuentaDTO;
 import com.finanzas.personales.dto.request.TransferenciaDTO;
 import com.finanzas.personales.enums.TipoCuenta;
+import com.finanzas.personales.enums.TipoMovimiento;
 import com.finanzas.personales.model.Cuenta;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.repository.CuentaRepository;
@@ -21,6 +22,7 @@ public class CuentaService {
 
     private final CuentaRepository cuentaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final MovimientoService movimientoService;
 
 
     public Cuenta crearCuenta(CuentaDTO dto, Usuario usuario) {
@@ -133,5 +135,10 @@ public class CuentaService {
 
         cuentaRepository.save(origen);
         cuentaRepository.save(destino);
+
+        movimientoService.registrarMovimientoInterno(origen, TipoMovimiento.EGRESO,
+                "Transferencia enviada a " + destino.getNombre(), dto.getMonto());
+        movimientoService.registrarMovimientoInterno(destino, TipoMovimiento.INGRESO,
+                "Transferencia recibida de " + origen.getNombre(), dto.getMonto());
     }
 }

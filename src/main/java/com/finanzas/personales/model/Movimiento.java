@@ -29,7 +29,7 @@ public class Movimiento {
     private Cuenta cuenta;
 
     @ManyToOne
-    @JoinColumn(name = "categoria_id", nullable = false)
+    @JoinColumn(name = "categoria_id")
     @JsonIgnoreProperties({"movimientos", "usuario"})
     private Categoria categoria;
 

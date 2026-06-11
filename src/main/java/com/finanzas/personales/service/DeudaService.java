@@ -3,6 +3,7 @@ package com.finanzas.personales.service;
 import com.finanzas.personales.Exception.UsuarioNoEncontradoException;
 import com.finanzas.personales.dto.request.DeudaRequestDTO;
 import com.finanzas.personales.dto.response.DeudaResponseDTO;
+import com.finanzas.personales.enums.TipoMovimiento;
 import com.finanzas.personales.model.Cuenta;
 import com.finanzas.personales.model.Deuda;
 import com.finanzas.personales.model.Usuario;
@@ -24,6 +25,7 @@ public class DeudaService {
     private final DeudaRepository deudaRepository;
     private final UsuarioRepository usuarioRepository;
     private final CuentaRepository cuentaRepository;
+    private final MovimientoService movimientoService;
 
     @Transactional
     public DeudaResponseDTO crear(DeudaRequestDTO dto, Long usuarioId) {
@@ -103,6 +105,9 @@ public class DeudaService {
 
             cuenta.setSaldo(cuenta.getSaldo().subtract(deuda.getMontoCuota()));
             cuentaRepository.save(cuenta);
+
+            movimientoService.registrarMovimientoInterno(cuenta, TipoMovimiento.EGRESO,
+                    "Pago de cuota - " + deuda.getNombre(), deuda.getMontoCuota());
         }
 
         deuda.setCuotasPagadas(deuda.getCuotasPagadas() + 1);
