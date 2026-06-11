@@ -28,4 +28,8 @@ public class MovimientoDTO {
 
         private LocalDate fecha;
 
+            private Long deudaId;
+                    private Long tarjetaId;
+                    private Long statementId;
+
 }   
