@@ -120,6 +120,10 @@ public class CuentaService {
         Cuenta destino = cuentaRepository.findById(dto.getCuentaDestinoId())
                 .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta destino no encontrada"));
 
+        if (!destino.getUsuario().getId().equals(usuarioId)) {
+            throw new CuentaNoEncontradaException("La cuenta destino no pertenece al usuario");
+        }
+
         if (origen.getSaldo().compareTo(dto.getMonto()) < 0) {
             throw new SaldoInsuficienteException("Saldo insuficiente");
         }

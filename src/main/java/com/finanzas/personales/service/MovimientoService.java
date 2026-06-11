@@ -34,7 +34,7 @@ public class MovimientoService {
         Cuenta cuenta = cuentaRepository.findByIdAndUsuarioId(dto.getCuentaId(), usuarioId)
                 .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada"));
 
-        Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
+        Categoria categoria = categoriaRepository.findByIdAndUsuarioId(dto.getCategoriaId(), usuarioId)
                 .orElseThrow(() -> new CategoriaNoEncontradaException("Categoria no encontrada"));
 
         if (dto.getTipo() == TipoMovimiento.EGRESO
@@ -150,7 +150,7 @@ public class MovimientoService {
             cuentaNueva.setSaldo(cuentaNueva.getSaldo().subtract(dto.getMonto()));
         }
 
-        Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
+        Categoria categoria = categoriaRepository.findByIdAndUsuarioId(dto.getCategoriaId(), usuarioId)
                 .orElseThrow(() -> new CategoriaNoEncontradaException("Categoria no encontrada"));
 
         movimiento.setCuenta(cuentaNueva);
