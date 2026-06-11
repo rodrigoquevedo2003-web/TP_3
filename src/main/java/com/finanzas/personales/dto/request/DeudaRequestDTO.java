@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import com.finanzas.personales.enums.TipoDeuda;
 import java.time.LocalDate;
 
 @Data
@@ -29,4 +30,13 @@ public class DeudaRequestDTO {
     private LocalDate fechaInicio;
 
     private Long cuentaId;
+
+    private Long categoriaId;
+
+    private Boolean tasaUva = false;
+
+    private BigDecimal montoEnUva;
+
+    @NotNull
+    private TipoDeuda tipoDeuda;
 }

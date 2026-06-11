@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import com.finanzas.personales.enums.TipoDeuda;
 import java.time.LocalDate;
 
 @Data
@@ -63,4 +64,20 @@ public class Deuda {
     @ManyToOne
     @JoinColumn(name = "cuenta_id")
     private Cuenta cuenta;
+
+    @ManyToOne
+    @JoinColumn(name = "categoria_id")
+    private Categoria categoria;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_deuda")
+    private TipoDeuda tipoDeuda;
+
+    @Column(nullable = false)
+    private Boolean tasaUva = false;
+
+    @Column(precision = 10, scale = 4)
+    private BigDecimal montoEnUva;
+
+    @Column(precision = 10, scale = 4)
+    private BigDecimal uvaValorInicial;
 }

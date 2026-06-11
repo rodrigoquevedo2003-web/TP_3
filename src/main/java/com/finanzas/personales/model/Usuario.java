@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,4 +32,8 @@ public class Usuario {
     @NotBlank
     @JsonIgnore
     private String password;
+
+    @OneToMany(mappedBy = "usuario")
+    @JsonIgnore
+    private List<Deuda> deudas;
 }

@@ -4,6 +4,7 @@ import com.finanzas.personales.model.Deuda;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import com.finanzas.personales.enums.TipoDeuda;
 import java.time.LocalDate;
 
 @Data
@@ -29,6 +30,11 @@ public class DeudaResponseDTO {
 
     private String cuentaNombre;
 
+    private Boolean tasaUva;
+    private BigDecimal montoEnUva;
+    private BigDecimal uvaValorInicial;
+    private TipoDeuda tipoDeuda;
+
     public static DeudaResponseDTO from(Deuda d) {
 
         DeudaResponseDTO dto = new DeudaResponseDTO();
@@ -48,9 +54,9 @@ public class DeudaResponseDTO {
         );
 
         dto.setMontoPendiente(
-                d.getMontoTotal().subtract(
-                        d.getMontoCuota().multiply(
-                                BigDecimal.valueOf(d.getCuotasPagadas())
+                d.getMontoCuota().multiply(
+                        BigDecimal.valueOf(
+                                d.getCuotasTotales() - d.getCuotasPagadas()
                         )
                 )
         );
@@ -59,7 +65,7 @@ public class DeudaResponseDTO {
 
         dto.setFechaFinEstimada(
                 d.getFechaInicio().plusMonths(
-                        d.getCuotasTotales()
+                        d.getCuotasTotales() - 1L
                 )
         );
 
@@ -70,6 +76,11 @@ public class DeudaResponseDTO {
                     d.getCuenta().getNombre()
             );
         }
+
+        dto.setTasaUva(d.getTasaUva());
+        dto.setMontoEnUva(d.getMontoEnUva());
+        dto.setUvaValorInicial(d.getUvaValorInicial());
+        dto.setTipoDeuda(d.getTipoDeuda());
 
         return dto;
     }

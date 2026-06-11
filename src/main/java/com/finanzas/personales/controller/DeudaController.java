@@ -73,4 +73,14 @@ public class DeudaController {
                 deudaService.calcularTotalPendiente(usuario.getId())
         );
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<DeudaResponseDTO> obtener(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Usuario usuario) {
+
+        return ResponseEntity.ok(
+                deudaService.obtener(id, usuario.getId())
+        );
+    }
 }
