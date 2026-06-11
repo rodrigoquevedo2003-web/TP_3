@@ -33,11 +33,24 @@ public class DeudaController {
     @GetMapping
     public ResponseEntity<List<DeudaResponseDTO>> listar(
             @AuthenticationPrincipal Usuario usuario,
-            @RequestParam(required = false) Boolean saldada) {
+            @RequestParam(required = false) Boolean saldada,
+            @RequestParam(required = false) com.finanzas.personales.enums.TipoDeuda tipo) {
+
+        if (saldada != null && tipo != null) {
+            return ResponseEntity.ok(
+                    deudaService.listarPorEstadoYTipo(usuario.getId(), saldada, tipo)
+            );
+        }
 
         if (saldada != null) {
             return ResponseEntity.ok(
                     deudaService.listarPorEstado(usuario.getId(), saldada)
+            );
+        }
+
+        if (tipo != null) {
+            return ResponseEntity.ok(
+                    deudaService.listarPorTipo(usuario.getId(), tipo)
             );
         }
 
@@ -53,6 +66,17 @@ public class DeudaController {
 
         return ResponseEntity.ok(
                 deudaService.pagarCuota(id, usuario.getId())
+        );
+    }
+
+    @PatchMapping("/{id}/pagar-cuotas-adelantadas")
+    public ResponseEntity<DeudaResponseDTO> pagarCuotasAdelantadas(
+            @PathVariable Long id,
+            @RequestParam int cantidad,
+            @AuthenticationPrincipal Usuario usuario) {
+
+        return ResponseEntity.ok(
+                deudaService.pagarCuotasAdelantadas(id, cantidad, usuario.getId())
         );
     }
 
@@ -72,6 +96,13 @@ public class DeudaController {
         return ResponseEntity.ok(
                 deudaService.calcularTotalPendiente(usuario.getId())
         );
+    }
+
+    @GetMapping("/resumen")
+    public ResponseEntity<com.finanzas.personales.dto.response.ResumenDeudasDTO> resumen(
+            @AuthenticationPrincipal Usuario usuario) {
+
+        return ResponseEntity.ok(deudaService.resumen(usuario.getId()));
     }
 
     @GetMapping("/{id}")

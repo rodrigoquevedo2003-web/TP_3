@@ -2,6 +2,9 @@ package com.finanzas.personales.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.finanzas.personales.enums.TipoMovimiento;
+import com.finanzas.personales.model.Deuda;
+import com.finanzas.personales.model.TarjetaCredito;
+import com.finanzas.personales.model.Statement;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -47,4 +50,19 @@ public class Movimiento {
 
     @Column(nullable = false)
     private LocalDate fecha;
+
+    @ManyToOne
+    @JoinColumn(name = "deuda_id")
+    @JsonIgnoreProperties({"usuario", "cuenta"})
+    private Deuda deuda;
+
+    @ManyToOne
+    @JoinColumn(name = "tarjeta_id")
+    @JsonIgnoreProperties({"usuario", "cuentaPago"})
+    private TarjetaCredito tarjeta;
+
+    @ManyToOne
+    @JoinColumn(name = "statement_id")
+    @JsonIgnoreProperties({"tarjeta"})
+    private Statement statement;
 }

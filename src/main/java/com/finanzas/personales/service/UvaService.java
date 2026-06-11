@@ -38,10 +38,12 @@ public class UvaService {
             if (resp instanceof List) {
                 List<?> lista = (List<?>) resp;
                 if (lista.isEmpty()) throw new RuntimeException("Respuesta UVA vacía");
-                Object first = lista.get(0);
-                if (first instanceof Map) return extractValor((Map<?, ?>) first);
+                Object last = lista.get(lista.size() - 1);
+                if (last instanceof Map) return extractValor((Map<?, ?>) last);
             } else if (resp instanceof Map) {
                 return extractValor((Map<?, ?>) resp);
+            } else if (resp instanceof Number) {
+                return toBigDecimal(resp);
             }
 
             throw new RuntimeException("Formato de respuesta UVA no reconocido");
@@ -51,7 +53,7 @@ public class UvaService {
     }
 
     private BigDecimal extractValor(Map<?, ?> map) {
-        String[] keys = new String[]{"valor", "value", "indice", "indice_uva", "valor_uva", "valor_actual"};
+        String[] keys = new String[]{"valor", "value", "v", "indice", "indice_uva", "valor_uva", "valor_actual", "dato"};
         for (String k : keys) {
             if (map.containsKey(k) && map.get(k) != null) {
                 Object v = map.get(k);

@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import com.finanzas.personales.enums.TipoDeuda;
+import com.finanzas.personales.enums.PeriodicidadInteres;
 import java.time.LocalDate;
 
 @Data
@@ -34,6 +35,25 @@ public class DeudaResponseDTO {
     private BigDecimal montoEnUva;
     private BigDecimal uvaValorInicial;
     private TipoDeuda tipoDeuda;
+    private java.math.BigDecimal montoActualPesos;
+    private java.math.BigDecimal cuotaActualPesos;
+    private java.math.BigDecimal pendienteActualPesos;
+    private java.math.BigDecimal interestRate;
+    private PeriodicidadInteres interestPeriod;
+    private java.math.BigDecimal totalPagado;
+    private java.util.List<com.finanzas.personales.dto.response.PagoDTO> pagos;
+
+    public void setMontoActualPesos(java.math.BigDecimal montoActualPesos) {
+        this.montoActualPesos = montoActualPesos;
+    }
+
+    public void setCuotaActualPesos(java.math.BigDecimal cuotaActualPesos) {
+        this.cuotaActualPesos = cuotaActualPesos;
+    }
+
+    public void setPendienteActualPesos(java.math.BigDecimal pendienteActualPesos) {
+        this.pendienteActualPesos = pendienteActualPesos;
+    }
 
     public static DeudaResponseDTO from(Deuda d) {
 
@@ -81,7 +101,22 @@ public class DeudaResponseDTO {
         dto.setMontoEnUva(d.getMontoEnUva());
         dto.setUvaValorInicial(d.getUvaValorInicial());
         dto.setTipoDeuda(d.getTipoDeuda());
+        dto.setInterestRate(d.getInterestRate());
+        dto.setInterestPeriod(d.getInterestPeriod());
+        dto.setMontoActualPesos(null);
+        dto.setCuotaActualPesos(null);
+        dto.setPendienteActualPesos(null);
+        dto.setTotalPagado(null);
+        dto.setPagos(null);
 
         return dto;
+    }
+
+    public void setPagos(java.util.List<com.finanzas.personales.dto.response.PagoDTO> pagos) {
+        this.pagos = pagos;
+    }
+
+    public void setTotalPagado(java.math.BigDecimal totalPagado) {
+        this.totalPagado = totalPagado;
     }
 }

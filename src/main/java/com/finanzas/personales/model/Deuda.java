@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import com.finanzas.personales.enums.TipoDeuda;
+import com.finanzas.personales.enums.PeriodicidadInteres;
 import java.time.LocalDate;
 
 @Data
@@ -80,4 +81,11 @@ public class Deuda {
 
     @Column(precision = 10, scale = 4)
     private BigDecimal uvaValorInicial;
+
+    @Column(precision = 6, scale = 4)
+    private BigDecimal interestRate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "interest_period")
+    private PeriodicidadInteres interestPeriod;
 }
