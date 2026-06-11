@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class MovimientoService {
     private final MovimientoRepository movimientoRepository;
     private final CuentaRepository cuentaRepository;
     private final CategoriaRepository categoriaRepository;
-
+    private final PresupuestoService presupuestoService;
 
     @Transactional
     public Movimiento crearMovimiento(MovimientoDTO dto, Long usuarioId) {
@@ -36,6 +37,8 @@ public class MovimientoService {
 
         Categoria categoria = categoriaRepository.findByIdAndUsuarioId(dto.getCategoriaId(), usuarioId)
                 .orElseThrow(() -> new CategoriaNoEncontradaException("Categoria no encontrada"));
+
+        LocalDate fecha = dto.getFecha() != null ? dto.getFecha() : LocalDate.now();
 
         if (dto.getTipo() == TipoMovimiento.EGRESO
                 && cuenta.getSaldo().compareTo(dto.getMonto()) < 0) {
@@ -48,12 +51,13 @@ public class MovimientoService {
         movimiento.setTipo(dto.getTipo());
         movimiento.setDescripcion(dto.getDescripcion());
         movimiento.setMonto(dto.getMonto());
-        movimiento.setFecha(dto.getFecha() != null ? dto.getFecha() : LocalDate.now());
+        movimiento.setFecha(fecha);
 
         if (dto.getTipo() == TipoMovimiento.INGRESO) {
             cuenta.setSaldo(cuenta.getSaldo().add(dto.getMonto()));
         }else{
             cuenta.setSaldo(cuenta.getSaldo().subtract(dto.getMonto()));
+            presupuestoService.registrarGasto(usuarioId, categoria.getId(), fecha, dto.getMonto());
         }
 
         cuentaRepository.save(cuenta);
@@ -109,6 +113,8 @@ public class MovimientoService {
             cuenta.setSaldo(cuenta.getSaldo().subtract(movimiento.getMonto()));
         } else {
             cuenta.setSaldo(cuenta.getSaldo().add(movimiento.getMonto()));
+            presupuestoService.revertirGasto(usuarioId, movimiento.getCategoria().getId(),
+                    movimiento.getFecha(), movimiento.getMonto());
         }
 
         cuentaRepository.save(cuenta);
@@ -120,6 +126,12 @@ public class MovimientoService {
     public Movimiento editarMovimiento(Long id, MovimientoDTO dto, Long usuarioId) {
         Movimiento movimiento = buscarPorIdYUsuario(id, usuarioId);
         Cuenta cuentaAnterior = movimiento.getCuenta();
+
+        TipoMovimiento tipoAnterior = movimiento.getTipo();
+        Long categoriaAnteriorId = movimiento.getCategoria().getId();
+        LocalDate fechaAnterior = movimiento.getFecha();
+        BigDecimal montoAnterior = movimiento.getMonto();
+
 
         if (movimiento.getTipo() == TipoMovimiento.INGRESO) {
             if (cuentaAnterior.getSaldo().compareTo(movimiento.getMonto()) < 0) {
@@ -153,12 +165,21 @@ public class MovimientoService {
         Categoria categoria = categoriaRepository.findByIdAndUsuarioId(dto.getCategoriaId(), usuarioId)
                 .orElseThrow(() -> new CategoriaNoEncontradaException("Categoria no encontrada"));
 
+        LocalDate fechaNueva = dto.getFecha() != null ? dto.getFecha() : movimiento.getFecha();
+
+        if (tipoAnterior == TipoMovimiento.EGRESO) {
+            presupuestoService.revertirGasto(usuarioId, categoriaAnteriorId, fechaAnterior, montoAnterior);
+        }
+        if (dto.getTipo() == TipoMovimiento.EGRESO) {
+            presupuestoService.registrarGasto(usuarioId, categoria.getId(), fechaNueva, dto.getMonto());
+        }
+
         movimiento.setCuenta(cuentaNueva);
         movimiento.setCategoria(categoria);
         movimiento.setTipo(dto.getTipo());
         movimiento.setDescripcion(dto.getDescripcion());
         movimiento.setMonto(dto.getMonto());
-        movimiento.setFecha(dto.getFecha() != null ? dto.getFecha() : movimiento.getFecha());
+        movimiento.setFecha(fechaNueva);
 
         cuentaRepository.save(cuentaNueva);
         return movimientoRepository.save(movimiento);

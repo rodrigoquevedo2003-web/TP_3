@@ -2,9 +2,12 @@
 package com.finanzas.personales.controller;
 
 
+import com.finanzas.personales.dto.request.PresupuestoRequestDTO;
 import com.finanzas.personales.model.Presupuesto;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.service.PresupuestoService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,19 +17,16 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/presupuesto")
+@RequiredArgsConstructor
 public class PresupuestoController {
 
 
     private final PresupuestoService presupuestoService;
 
-
-    public PresupuestoController(PresupuestoService presupuestoService) {
-        this.presupuestoService = presupuestoService;
-    }
     @PostMapping
-    public Presupuesto guardar(@RequestBody Presupuesto presupuesto,
+    public Presupuesto guardar(@Valid @RequestBody PresupuestoRequestDTO dto,
                                @AuthenticationPrincipal Usuario usuario) {
-        return presupuestoService.guardar(presupuesto, usuario);
+        return presupuestoService.guardar(dto, usuario);
     }
 
 
@@ -51,10 +51,9 @@ public class PresupuestoController {
 
 
     @PutMapping("/{id}")
-    public Presupuesto actualizar(@PathVariable Long id,
-                                  @RequestBody Presupuesto presupuesto,
+    public Presupuesto actualizar(@PathVariable Long id, @Valid @RequestBody PresupuestoRequestDTO dto,
                                   @AuthenticationPrincipal Usuario usuario) {
-        return presupuestoService.actualizar(id, presupuesto, usuario.getId());
+        return presupuestoService.actualizar(id, dto, usuario.getId());
     }
 
 

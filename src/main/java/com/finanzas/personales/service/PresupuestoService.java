@@ -1,33 +1,47 @@
 package com.finanzas.personales.service;
 
 
+import com.finanzas.personales.Exception.CategoriaNoEncontradaException;
+import com.finanzas.personales.Exception.PresupuestoExcedidoException;
 import com.finanzas.personales.Exception.PresupuestoInexistenteException;
+import com.finanzas.personales.dto.request.PresupuestoRequestDTO;
+import com.finanzas.personales.model.Categoria;
 import com.finanzas.personales.model.Presupuesto;
 import com.finanzas.personales.model.Usuario;
+import com.finanzas.personales.repository.CategoriaRepository;
 import com.finanzas.personales.repository.PresupuestoRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 
-
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 
 @Service
+@RequiredArgsConstructor
 public class PresupuestoService {
 
 
     private final PresupuestoRepository presupuestoRepository;
+    private final CategoriaRepository categoriaRepository;
 
+    @Transactional
+    public Presupuesto guardar(PresupuestoRequestDTO dto, Usuario usuario) {
+        Categoria categoria = categoriaRepository.findByIdAndUsuarioId(dto.getCategoriaId(), usuario.getId())
+                .orElseThrow(() -> new CategoriaNoEncontradaException("Categoria no encontrada"));
 
-    public PresupuestoService(PresupuestoRepository presupuestoRepository) {
-        this.presupuestoRepository = presupuestoRepository;
-    }
+        Presupuesto p = new Presupuesto();
+        p.setMontoLimite(dto.getMontoLimite());
+        p.setMontoConsumido(BigDecimal.ZERO);
+        p.setMes(dto.getMes());
+        p.setAnio(dto.getAnio());
+        p.setCategoria(categoria);
+        p.setUsuario(usuario);
 
-
-    public Presupuesto guardar(Presupuesto presupuesto, Usuario usuario) {
-        presupuesto.setUsuario(usuario);
-        return presupuestoRepository.save(presupuesto);
+        return presupuestoRepository.save(p);
     }
 
 
@@ -54,20 +68,46 @@ public class PresupuestoService {
 
 
     @Transactional
-    public Presupuesto actualizar(Long id, Presupuesto presupuesto, Long usuarioId) {
+    public Presupuesto actualizar(Long id, PresupuestoRequestDTO dto, Long usuarioId) {
         Presupuesto p = listarXid(id, usuarioId);
 
+        Categoria categoria = categoriaRepository.findByIdAndUsuarioId(dto.getCategoriaId(), usuarioId)
+                .orElseThrow(() -> new CategoriaNoEncontradaException("Categoria no encontrada"));
 
-        p.setAnio(presupuesto.getAnio());
-        p.setCategoria(presupuesto.getCategoria());
-        p.setMes(presupuesto.getMes());
-        p.setMontoConsumido(presupuesto.getMontoConsumido());
-        p.setMontoLimite(presupuesto.getMontoLimite());
-
-
-
+        p.setAnio(dto.getAnio());
+        p.setCategoria(categoria);
+        p.setMes(dto.getMes());
+        p.setMontoLimite(dto.getMontoLimite());
 
         return presupuestoRepository.save(p);
     }
 
+    @Transactional
+    public void registrarGasto(Long usuarioId, Long categoriaId, LocalDate fecha, BigDecimal monto) {
+        presupuestoRepository
+                .findByUsuarioIdAndCategoriaIdAndMesAndAnio(usuarioId, categoriaId, fecha.getMonthValue(), fecha.getYear())
+                .ifPresent(p -> {
+                    BigDecimal nuevoConsumido = p.getMontoConsumido().add(monto);
+                    if (nuevoConsumido.compareTo(p.getMontoLimite()) > 0) {
+                        throw new PresupuestoExcedidoException(
+                                "El gasto supera el límite del presupuesto de la categoría para ese mes");
+                    }
+                    p.setMontoConsumido(nuevoConsumido);
+                    presupuestoRepository.save(p);
+                });
+    }
+
+    @Transactional
+    public void revertirGasto(Long usuarioId, Long categoriaId, LocalDate fecha, BigDecimal monto) {
+        presupuestoRepository
+                .findByUsuarioIdAndCategoriaIdAndMesAndAnio(usuarioId, categoriaId, fecha.getMonthValue(), fecha.getYear())
+                .ifPresent(p -> {
+                    BigDecimal nuevoConsumido = p.getMontoConsumido().subtract(monto);
+                    if (nuevoConsumido.compareTo(BigDecimal.ZERO) < 0) {
+                        nuevoConsumido = BigDecimal.ZERO;
+                    }
+                    p.setMontoConsumido(nuevoConsumido);
+                    presupuestoRepository.save(p);
+                });
+    }
 }
