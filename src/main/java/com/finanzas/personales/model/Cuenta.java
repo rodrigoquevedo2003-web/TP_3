@@ -41,7 +41,7 @@ public class Cuenta {
     @OneToMany(mappedBy = "cuenta")
     private List<Movimiento> movimientos;
 
-    @OneToMany(mappedBy = "usuario")
+    @OneToMany(mappedBy = "cuenta")
     @JsonIgnore
     private List<Deuda> deudas;
 }
