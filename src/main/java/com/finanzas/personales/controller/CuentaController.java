@@ -1,10 +1,12 @@
 package com.finanzas.personales.controller;
 
 import com.finanzas.personales.dto.CuentaDTO;
+import com.finanzas.personales.dto.CuentaUpdateDTO;
 import com.finanzas.personales.dto.request.TransferenciaDTO;
 import com.finanzas.personales.model.Cuenta;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.service.CuentaService;
+import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +23,7 @@ public class CuentaController {
     }
 
     @PostMapping
-    public Cuenta crearCuenta(@RequestBody CuentaDTO dto, @AuthenticationPrincipal Usuario usuario) {
+    public Cuenta crearCuenta(@Valid @RequestBody CuentaDTO dto, @AuthenticationPrincipal Usuario usuario) {
         return cuentaService.crearCuenta(dto, usuario);
     }
 
@@ -37,8 +39,8 @@ public class CuentaController {
 
 
     @PutMapping("/{id}")
-    public Cuenta actualizarCuenta(@PathVariable Long id, @RequestBody Cuenta cuenta,  @AuthenticationPrincipal Usuario usuario) {
-        return cuentaService.actualizarCuenta(id, cuenta, usuario.getId());
+    public Cuenta actualizarCuenta(@PathVariable Long id, @Valid @RequestBody CuentaUpdateDTO dto, @AuthenticationPrincipal Usuario usuario) {
+        return cuentaService.actualizarCuenta(id, dto, usuario.getId());
     }
 
     @DeleteMapping("/{id}")
