@@ -2,6 +2,7 @@ package com.finanzas.personales.service;
 
 import com.finanzas.personales.Exception.*;
 import com.finanzas.personales.dto.CuentaDTO;
+import com.finanzas.personales.dto.CuentaUpdateDTO;
 import com.finanzas.personales.dto.request.TransferenciaDTO;
 import com.finanzas.personales.enums.TipoCuenta;
 import com.finanzas.personales.enums.TipoMovimiento;
@@ -45,21 +46,12 @@ public class CuentaService {
         Cuenta cuenta = new Cuenta();
 
         cuenta.setNombre(dto.getNombre());
-        cuenta.setSaldo(dto.getSaldo());
+        cuenta.setSaldo(dto.getSaldo() != null ? dto.getSaldo() : BigDecimal.ZERO);
         cuenta.setTipoCuenta(dto.getTipoCuenta());
         cuenta.setActiva(true);
         cuenta.setUsuario(usuario);
 
         return cuentaRepository.save(cuenta);
-    }
-
-    public List<Cuenta> listarCuentas() {
-        return cuentaRepository.findAll();
-    }
-
-    public Cuenta buscarPorId(Long id) {
-        return cuentaRepository.findById(id)
-                .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada"));
     }
 
     public List<Cuenta> listarPorUsuario(Long usuarioId) {
@@ -71,13 +63,13 @@ public class CuentaService {
                 .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada"));
     }
 
-    public Cuenta actualizarCuenta(Long id, Cuenta cuentaActualizada, Long usuarioId) {
+    public Cuenta actualizarCuenta(Long id, CuentaUpdateDTO dto, Long usuarioId) {
         Cuenta cuenta = buscarPropia(id, usuarioId);
 
-        cuenta.setNombre(cuentaActualizada.getNombre());
+        cuenta.setNombre(dto.getNombre());
 
-        if (cuenta.getTipoCuenta() != TipoCuenta.EFECTIVO) {
-            cuenta.setTipoCuenta(cuentaActualizada.getTipoCuenta());
+        if (cuenta.getTipoCuenta() != TipoCuenta.EFECTIVO && dto.getTipoCuenta() != null) {
+            cuenta.setTipoCuenta(dto.getTipoCuenta());
         }
 
         return cuentaRepository.save(cuenta);
@@ -98,10 +90,14 @@ public class CuentaService {
     @Transactional
     public void transferir(TransferenciaDTO dto, Long usuarioId) {
 
-        if (dto.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
+        if (dto.getMonto() == null ||dto.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
             throw new TransferenciaInvalidaException(
                     "El monto debe ser mayor a cero"
             );
+        }
+
+        if (dto.getCuentaOrigenId() == null || dto.getCuentaDestinoId() == null){
+            throw new TransferenciaInvalidaException("Alguna de las cuentas no fue especificada");
         }
 
         if (dto.getCuentaOrigenId().equals(dto.getCuentaDestinoId())) {
@@ -124,6 +120,10 @@ public class CuentaService {
 
         if (!destino.getUsuario().getId().equals(usuarioId)) {
             throw new CuentaNoEncontradaException("La cuenta destino no pertenece al usuario");
+        }
+
+        if(Boolean.FALSE.equals(origen.getActiva()) || Boolean.FALSE.equals(destino.getActiva())){
+            throw new TransferenciaInvalidaException("No es posible operar con una cuenta inactiva");
         }
 
         if (origen.getSaldo().compareTo(dto.getMonto()) < 0) {
