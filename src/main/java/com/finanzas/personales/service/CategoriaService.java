@@ -2,6 +2,7 @@ package com.finanzas.personales.service;
 
 import com.finanzas.personales.Exception.CategoriaEnUsoException;
 import com.finanzas.personales.Exception.CategoriaNoEncontradaException;
+import com.finanzas.personales.Exception.ReglaNegocioException;
 import com.finanzas.personales.dto.request.CategoriaRequestDTO;
 import com.finanzas.personales.dto.response.CategoriaResponseDTO;
 import com.finanzas.personales.enums.TipoMovimiento;
@@ -22,7 +23,7 @@ public class CategoriaService {
 
     public CategoriaResponseDTO crear(CategoriaRequestDTO dto, Usuario usuario){
         if(categoriaRepository.existsByUsuarioIdAndNombreIgnoreCase(usuario.getId(), dto.getNombre())){
-            throw new RuntimeException("Ya existe una categoria con ese nombre");
+            throw new ReglaNegocioException("Ya existe una categoria con ese nombre");
         }
 
         Categoria categoria = new Categoria();
@@ -63,7 +64,7 @@ public class CategoriaService {
         boolean nombreCambio = !categoria.getNombre().equalsIgnoreCase(dto.getNombre());
 
         if(nombreCambio && categoriaRepository.existsByUsuarioIdAndNombreIgnoreCase(usuarioId, dto.getNombre())){
-            throw new RuntimeException("Ya existe una categoria con ese nombre");
+            throw new ReglaNegocioException("Ya existe una categoria con ese nombre");
         }
 
         categoria.setNombre(dto.getNombre());
