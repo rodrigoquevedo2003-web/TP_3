@@ -2,6 +2,7 @@ package com.finanzas.personales.Exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -32,20 +33,45 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
+    @ExceptionHandler(ReglaNegocioException.class)
+    public ResponseEntity<Map<String, Object>> handleReglaNegocio(ReglaNegocioException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(CuentaEfectivoExistenteException.class)
+    public ResponseEntity<Map<String, Object>> handleCuentaEfectivoExistente(CuentaEfectivoExistenteException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     @ExceptionHandler(CredencialesInvalidasException.class)
     public ResponseEntity<Map<String, Object>> handleCredenciales(CredencialesInvalidasException ex) {
         return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
-    @ExceptionHandler({SaldoInsuficienteException.class, PresupuestoExcedidoException.class})
+    @ExceptionHandler({SaldoInsuficienteException.class, PresupuestoExcedidoException.class, TransferenciaInvalidaException.class, CuentaEfectivoNoEliminableException.class})
     public ResponseEntity<Map<String, Object>> handleReglasNegocio(RuntimeException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<Map<String, Object>> handleConcurrencia(ObjectOptimisticLockingFailureException ex) {
+        return buildResponse(HttpStatus.CONFLICT,
+                "El recurso fue modificado por otra operacion. Volve a intentar.");
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex) {
-        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error del servidor");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
