@@ -1,49 +1,23 @@
 package com.finanzas.personales.dto;
 
 import com.finanzas.personales.enums.TipoCuenta;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 import java.math.BigDecimal;
 
+@Data
 public class CuentaDTO {
 
-    private Long usuarioId;
+    @NotBlank(message = "El nombre de la cuenta es obligatorio")
     private String nombre;
+
+    @NotNull(message = "El saldo inicial es obligatorio")
+    @DecimalMin(value = "0.00", message = "El saldo no puede ser negativo")
     private BigDecimal saldo;
+
+    @NotNull(message = "El tipo de cuenta es obligatorio")
     private TipoCuenta tipoCuenta;
-
-
-    public CuentaDTO() {
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public BigDecimal getSaldo() {
-        return saldo;
-    }
-
-    public void setSaldo(BigDecimal saldo) {
-        this.saldo = saldo;
-    }
-
-    public Long getUsuarioId() {
-        return usuarioId;
-    }
-
-    public void setUsuarioId(Long usuarioId) {
-        this.usuarioId = usuarioId;
-    }
-
-    public TipoCuenta getTipoCuenta() {
-        return tipoCuenta;
-    }
-
-    public void setTipoCuenta(TipoCuenta tipoCuenta) {
-        this.tipoCuenta = tipoCuenta;
-    }
 }
