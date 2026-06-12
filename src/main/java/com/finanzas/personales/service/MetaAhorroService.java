@@ -140,14 +140,13 @@ public class MetaAhorroService {
 
 
     private void registrarMovimientoMeta(Cuenta cuenta, BigDecimal monto, TipoMovimiento tipo, String descripcion, Long usuarioId){
-        Categoria categoria = categoriaRepository.findByUsuarioId(usuarioId)
-                .stream()
-                .filter(c -> c.getNombre().toLowerCase().contains("ahorro") || c.getNombre().toLowerCase().contains("meta"))
+        List<Categoria> delTipo = categoriaRepository.findByUsuarioIdAndTipo(usuarioId, tipo);
+
+        Categoria categoria = delTipo.stream()
+                .filter(c -> {String string = c.getNombre().toLowerCase();
+                    return string.contains("ahorro") || string.contains("meta");})
                 .findFirst()
-                .orElse(categoriaRepository.findByUsuarioId(usuarioId)
-                        .stream()
-                        .findFirst()
-                        .orElseThrow(() -> new RuntimeException("El usuario no tiene categorias disponibles")));
+                .orElse(null);
 
         Movimiento movimiento = new Movimiento();
         movimiento.setCuenta(cuenta);
@@ -188,6 +187,6 @@ public class MetaAhorroService {
         if(meta.getCuenta() != null){
             return meta.getCuenta();
         }
-        throw new CuentaNoEncontradaException("Debe indicar una cuenta. La meta no tiene cuenta por defecto asiganada");
+        throw new CuentaNoEncontradaException("Debe indicar una cuenta. La meta no tiene cuenta por defecto asignada");
     }
 }
