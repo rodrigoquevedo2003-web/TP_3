@@ -1,6 +1,5 @@
 package com.finanzas.personales.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.finanzas.personales.enums.TipoCuenta;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -40,8 +39,4 @@ public class Cuenta {
 
     @OneToMany(mappedBy = "cuenta")
     private List<Movimiento> movimientos;
-
-    @OneToMany(mappedBy = "cuenta")
-    @JsonIgnore
-    private List<Deuda> deudas;
 }

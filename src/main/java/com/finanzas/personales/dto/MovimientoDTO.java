@@ -27,9 +27,4 @@ public class MovimientoDTO {
         private BigDecimal monto;
 
         private LocalDate fecha;
-
-            private Long deudaId;
-                    private Long tarjetaId;
-                    private Long statementId;
-
 }   
