@@ -33,6 +33,9 @@ public class Cuenta {
     @Column(nullable = false)
     private Boolean activa = true;
 
+    @Version
+    private Long version;
+
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;

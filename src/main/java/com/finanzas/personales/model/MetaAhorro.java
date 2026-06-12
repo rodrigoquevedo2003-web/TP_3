@@ -39,6 +39,9 @@ public class MetaAhorro {
     @Column(nullable = false)
     private Boolean cumplida = false;
 
+    @Version
+    private Long version;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
