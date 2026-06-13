@@ -19,6 +19,7 @@ public class ReglaRecurrenteProcessor {
 
     private final MovimientoRepository movimientoRepo;
     private final ReglaRecurrenteRepository reglaRepo;
+    private final EmailService emailService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void procesarReglaIndividual(ReglaRecurrente regla, LocalDate hoy) {
@@ -26,6 +27,7 @@ public class ReglaRecurrenteProcessor {
         avanzarProximaEjecucion(regla, hoy);
         log.info("[Scheduler] ✓ Movimiento creado para regla ID={} | cuenta='{}' | monto={}",
                 regla.getId(), regla.getCuenta().getNombre(), regla.getMonto());
+        notificarPorEmail(regla, hoy);
     }
 
     private void crearMovimientoDesdeRegla(ReglaRecurrente regla, LocalDate fecha) {
@@ -50,5 +52,23 @@ public class ReglaRecurrenteProcessor {
         }
         regla.setProximaEjecucion(proxima);
         reglaRepo.save(regla);
+    }
+
+    private void notificarPorEmail(ReglaRecurrente regla, LocalDate fecha) {
+        try {
+            String destino = regla.getCuenta().getUsuario().getEmail();
+            String asunto = "Movimiento automático: " + regla.getDescripcion();
+            String cuerpo = "Hola!\n\n"
+                    + "Se ejecutó tu regla recurrente y se registró un movimiento automático:\n\n"
+                    + "- Descripción: " + regla.getDescripcion() + "\n"
+                    + "- Tipo: " + regla.getTipo() + "\n"
+                    + "- Monto: $" + regla.getMonto() + "\n"
+                    + "- Cuenta: " + regla.getCuenta().getNombre() + "\n"
+                    + "- Fecha: " + fecha + "\n\n"
+                    + "Saludos,\nFinanzas Personales";
+            emailService.enviar(destino, asunto, cuerpo);
+        } catch (Exception e) {
+            log.error("[Email] No se pudo notificar la regla ID={}: {}", regla.getId(), e.getMessage());
+        }
     }
 }
