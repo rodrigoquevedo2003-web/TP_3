@@ -3,61 +3,43 @@ package com.finanzas.personales.controller;
 
 
 import com.finanzas.personales.dto.request.ReglaRecurrenteRequestDTO;
+import com.finanzas.personales.dto.response.ReglaRecurrenteResponseDTO;
+import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.service.ReglaRecurrenteService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 
 @RestController
-@RequestMapping("/api/reglas-recurrentes")
+@RequestMapping("/reglas-recurrentes")
 @RequiredArgsConstructor
 public class ReglaRecurrenteController {
 
     private final ReglaRecurrenteService service;
 
     @PostMapping
-    public ResponseEntity<?> crear(
-            @RequestBody @jakarta.validation.Valid ReglaRecurrenteRequestDTO dto,
-            @RequestParam Long usuarioId) {
-        try {
-            return ResponseEntity.ok(service.crearRegla(dto, usuarioId));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<ReglaRecurrenteResponseDTO> crear(
+            @AuthenticationPrincipal Usuario usuario,
+            @Valid @RequestBody ReglaRecurrenteRequestDTO dto) {
+        return ResponseEntity.ok(service.crearRegla(dto, usuario.getId()));
     }
 
-
-    @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<?> listarPorUsuario(
-            @PathVariable Long usuarioId,
-            @RequestParam Long usuarioLogueadoId) {
-        try {
-            return ResponseEntity.ok(service.obtenerReglasPorUsuario(usuarioId, usuarioLogueadoId));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @GetMapping
+    public ResponseEntity<List<ReglaRecurrenteResponseDTO>> listarPorUsuario(
+            @AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(service.obtenerReglasPorUsuario(usuario.getId()));
     }
-
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> desactivar(
+    public ResponseEntity<Void> desactivar(
             @PathVariable Long id,
-            @RequestParam Long usuarioId) {
-        try {
-            service.desactivarRegla(id, usuarioId);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-
-    @PostMapping("/test-scheduler")
-    public ResponseEntity<String> forzarScheduler() {
-        service.ejecutarReglasVencidas();
-        return ResponseEntity.ok("Scheduler ejecutado manualmente con éxito. Revisá la consola de IntelliJ.");
+            @AuthenticationPrincipal Usuario usuario) {
+        service.desactivarRegla(id, usuario.getId());
+        return ResponseEntity.noContent().build();
     }
 }

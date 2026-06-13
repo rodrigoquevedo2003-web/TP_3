@@ -49,6 +49,7 @@ public class ReglaRecurrente {
     private LocalDate proximaEjecucion;
 
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean activa = true;
 }

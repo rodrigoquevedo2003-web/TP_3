@@ -1,0 +1,54 @@
+package com.finanzas.personales.service;
+
+import com.finanzas.personales.model.Movimiento;
+import com.finanzas.personales.model.ReglaRecurrente;
+import com.finanzas.personales.repository.MovimientoRepository;
+import com.finanzas.personales.repository.ReglaRecurrenteRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class ReglaRecurrenteProcessor {
+
+    private final MovimientoRepository movimientoRepo;
+    private final ReglaRecurrenteRepository reglaRepo;
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void procesarReglaIndividual(ReglaRecurrente regla, LocalDate hoy) {
+        crearMovimientoDesdeRegla(regla, hoy);
+        avanzarProximaEjecucion(regla, hoy);
+        log.info("[Scheduler] ✓ Movimiento creado para regla ID={} | cuenta='{}' | monto={}",
+                regla.getId(), regla.getCuenta().getNombre(), regla.getMonto());
+    }
+
+    private void crearMovimientoDesdeRegla(ReglaRecurrente regla, LocalDate fecha) {
+        Movimiento movimiento = new Movimiento();
+        movimiento.setCuenta(regla.getCuenta());
+        movimiento.setCategoria(regla.getCategoria());
+        movimiento.setTipo(regla.getTipo());
+        movimiento.setDescripcion(regla.getDescripcion() + " (automático)");
+        movimiento.setMonto(regla.getMonto());
+        movimiento.setFecha(fecha);
+        movimientoRepo.save(movimiento);
+    }
+
+    private void avanzarProximaEjecucion(ReglaRecurrente regla, LocalDate hoy) {
+        if (regla.getFrecuenciaDias() <= 0) {
+            throw new IllegalStateException(
+                    "frecuenciaDias debe ser mayor a 0 para regla ID=" + regla.getId());
+        }
+        LocalDate proxima = regla.getProximaEjecucion();
+        while (!proxima.isAfter(hoy)) {
+            proxima = proxima.plusDays(regla.getFrecuenciaDias());
+        }
+        regla.setProximaEjecucion(proxima);
+        reglaRepo.save(regla);
+    }
+}
