@@ -1,6 +1,7 @@
 package com.finanzas.personales.repository;
 
 
+
 import com.finanzas.personales.model.ReglaRecurrente;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+
 
 @Repository
 public interface ReglaRecurrenteRepository extends JpaRepository<ReglaRecurrente, Long> {
@@ -29,4 +31,6 @@ public interface ReglaRecurrenteRepository extends JpaRepository<ReglaRecurrente
     WHERE r.activa = true AND r.proximaEjecucion <= :fecha
     """)
     List<ReglaRecurrente> findByActivaTrueAndProximaEjecucionLessThanEqual(@Param("fecha") LocalDate fecha);
+
+
 }

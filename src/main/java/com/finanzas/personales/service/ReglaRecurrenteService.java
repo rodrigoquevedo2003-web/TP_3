@@ -1,28 +1,21 @@
 package com.finanzas.personales.service;
 
-
 import com.finanzas.personales.dto.request.ReglaRecurrenteRequestDTO;
+import com.finanzas.personales.dto.response.ReglaRecurrenteResponseDTO;
 import com.finanzas.personales.model.Categoria;
 import com.finanzas.personales.model.Cuenta;
-import com.finanzas.personales.model.Movimiento;
 import com.finanzas.personales.model.ReglaRecurrente;
 import com.finanzas.personales.repository.CategoriaRepository;
 import com.finanzas.personales.repository.CuentaRepository;
-import com.finanzas.personales.repository.MovimientoRepository;
 import com.finanzas.personales.repository.ReglaRecurrenteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-
-
-
 
 @Slf4j
 @Service
@@ -30,12 +23,12 @@ import java.util.List;
 public class ReglaRecurrenteService {
 
     private final ReglaRecurrenteRepository reglaRepo;
-    private final MovimientoRepository movimientoRepo;
     private final CuentaRepository cuentaRepo;
     private final CategoriaRepository categoriaRepo;
-
+    private final ReglaRecurrenteProcessor processor;
 
     @Scheduled(cron = "0 0 6 * * *")
+    @Transactional
     public void ejecutarReglasVencidas() {
         LocalDate hoy = LocalDate.now();
         log.info("[Scheduler] Verificando reglas recurrentes para la fecha: {}", hoy);
@@ -50,10 +43,11 @@ public class ReglaRecurrenteService {
 
         log.info("[Scheduler] Procesando {} regla(s)...", reglasPendientes.size());
 
+        int exitosas = 0;
         for (ReglaRecurrente regla : reglasPendientes) {
             try {
-
-                procesarReglaIndividual(regla, hoy);
+                processor.procesarReglaIndividual(regla, hoy);
+                exitosas++;
             } catch (org.springframework.dao.DataAccessException e) {
                 log.error("[Scheduler] ✗ Error de base de datos en regla ID={}: {}", regla.getId(), e.getMessage());
             } catch (Exception e) {
@@ -61,29 +55,18 @@ public class ReglaRecurrenteService {
             }
         }
 
-        log.info("[Scheduler] Finalizado. {} regla(s) procesada(s).", reglasPendientes.size());
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void procesarReglaIndividual(ReglaRecurrente regla, LocalDate hoy) {
-        crearMovimientoDesdeRegla(regla, hoy);
-        avanzarProximaEjecucion(regla, hoy);
-        log.info("[Scheduler] ✓ Movimiento creado para regla ID={} | cuenta='{}' | monto={}",
-                regla.getId(), regla.getCuenta().getNombre(), regla.getMonto());
+        log.info("[Scheduler] Finalizado. {}/{} regla(s) procesada(s) con éxito.",
+                exitosas, reglasPendientes.size());
     }
 
 
     @Transactional
-    public ReglaRecurrente crearRegla(ReglaRecurrenteRequestDTO dto, Long usuarioId) {
-
+    public ReglaRecurrenteResponseDTO crearRegla(ReglaRecurrenteRequestDTO dto, Long usuarioId) {
         Cuenta cuenta = cuentaRepo.findByIdAndUsuarioId(dto.getCuentaId(), usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Cuenta no encontrada o no te pertenece (ID: " + dto.getCuentaId() + ")"));
 
-
-        Categoria categoria = categoriaRepo.findByUsuarioId(usuarioId).stream()
-                .filter(c -> c.getId().equals(dto.getCategoriaId()))
-                .findFirst()
+        Categoria categoria = categoriaRepo.findByIdAndUsuarioId(dto.getCategoriaId(), usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Categoría no encontrada o no te pertenece (ID: " + dto.getCategoriaId() + ")"));
 
@@ -99,15 +82,13 @@ public class ReglaRecurrenteService {
                 .activa(true)
                 .build();
 
-        return reglaRepo.save(regla);
+        return toDTO(reglaRepo.save(regla)); // ✅ Corregido: wrapeado en toDTO()
     }
-
 
     @Transactional
     public void desactivarRegla(Long reglaId, Long usuarioId) {
         ReglaRecurrente regla = reglaRepo.findById(reglaId)
                 .orElseThrow(() -> new IllegalArgumentException("Regla no encontrada: " + reglaId));
-
 
         Long duenioId = regla.getCuenta().getUsuario().getId();
         if (!duenioId.equals(usuarioId)) {
@@ -117,41 +98,33 @@ public class ReglaRecurrenteService {
         }
 
         regla.setActiva(false);
-        reglaRepo.save(regla);
+
         log.info("[Service] Regla ID={} desactivada con éxito por su dueño (Usuario ID={})", reglaId, usuarioId);
     }
 
 
     @Transactional(readOnly = true)
-    public List<ReglaRecurrente> obtenerReglasPorUsuario(Long usuarioId, Long usuarioLogueadoId) {
-
-
-        if (!usuarioId.equals(usuarioLogueadoId)) {
-            throw new IllegalArgumentException("No tenés permiso para ver las reglas de otro usuario.");
-        }
-
-
-        return reglaRepo.findByUsuarioId(usuarioId);
+    public List<ReglaRecurrenteResponseDTO> obtenerReglasPorUsuario(Long usuarioId) {
+        return reglaRepo.findByUsuarioId(usuarioId)
+                .stream()
+                .map(this::toDTO)
+                .toList();
     }
 
-    private void crearMovimientoDesdeRegla(ReglaRecurrente regla, LocalDate fecha) {
-        Movimiento movimiento = new Movimiento();
-        movimiento.setCuenta(regla.getCuenta());
-        movimiento.setCategoria(regla.getCategoria());
-        movimiento.setTipo(regla.getTipo());
-        movimiento.setDescripcion(regla.getDescripcion() + " (automático)");
-        movimiento.setMonto(regla.getMonto());
-        movimiento.setFecha(fecha);
-
-        movimientoRepo.save(movimiento);
-    }
-
-    private void avanzarProximaEjecucion(ReglaRecurrente regla, LocalDate hoy) {
-        LocalDate proxima = regla.getProximaEjecucion();
-        while (!proxima.isAfter(hoy)) {
-            proxima = proxima.plusDays(regla.getFrecuenciaDias());
-        }
-        regla.setProximaEjecucion(proxima);
-        reglaRepo.save(regla);
+    private ReglaRecurrenteResponseDTO toDTO(ReglaRecurrente r) {
+        return ReglaRecurrenteResponseDTO.builder()
+                .id(r.getId())
+                .cuentaId(r.getCuenta().getId())
+                .cuentaNombre(r.getCuenta().getNombre())
+                .categoriaId(r.getCategoria().getId())
+                .categoriaNombre(r.getCategoria().getNombre())
+                .tipo(r.getTipo())
+                .descripcion(r.getDescripcion())
+                .monto(r.getMonto())
+                .esFamiliar(r.getEsFamiliar())
+                .frecuenciaDias(r.getFrecuenciaDias())
+                .proximaEjecucion(r.getProximaEjecucion())
+                .activa(r.getActiva())
+                .build();
     }
 }
