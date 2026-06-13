@@ -1,6 +1,7 @@
 package com.finanzas.personales.service;
 
 
+import com.finanzas.personales.Exception.RecursoNoEncontradoException;
 import com.finanzas.personales.dto.request.ReglaRecurrenteRequestDTO;
 import com.finanzas.personales.model.Categoria;
 import com.finanzas.personales.model.Cuenta;
@@ -77,14 +78,12 @@ public class ReglaRecurrenteService {
     public ReglaRecurrente crearRegla(ReglaRecurrenteRequestDTO dto, Long usuarioId) {
 
         Cuenta cuenta = cuentaRepo.findByIdAndUsuarioId(dto.getCuentaId(), usuarioId)
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new RecursoNoEncontradoException(
                         "Cuenta no encontrada o no te pertenece (ID: " + dto.getCuentaId() + ")"));
 
 
-        Categoria categoria = categoriaRepo.findByUsuarioId(usuarioId).stream()
-                .filter(c -> c.getId().equals(dto.getCategoriaId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
+        Categoria categoria = categoriaRepo.findByIdAndUsuarioId(dto.getCategoriaId(), usuarioId)
+                .orElseThrow(() -> new RecursoNoEncontradoException(
                         "Categoría no encontrada o no te pertenece (ID: " + dto.getCategoriaId() + ")"));
 
         ReglaRecurrente regla = ReglaRecurrente.builder()
@@ -106,14 +105,15 @@ public class ReglaRecurrenteService {
     @Transactional
     public void desactivarRegla(Long reglaId, Long usuarioId) {
         ReglaRecurrente regla = reglaRepo.findById(reglaId)
-                .orElseThrow(() -> new IllegalArgumentException("Regla no encontrada: " + reglaId));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Regla no encontrada: " + reglaId));
+
 
 
         Long duenioId = regla.getCuenta().getUsuario().getId();
         if (!duenioId.equals(usuarioId)) {
             log.warn("[Seguridad] El usuario ID={} intentó desactivar la regla ID={} del usuario ID={}",
                     usuarioId, reglaId, duenioId);
-            throw new IllegalArgumentException("No tenés permisos para cancelar esta regla porque no te pertenece.");
+            throw new RecursoNoEncontradoException("No tenés permisos para cancelar esta regla porque no te pertenece.");
         }
 
         regla.setActiva(false);
