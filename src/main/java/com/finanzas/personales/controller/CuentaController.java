@@ -1,8 +1,8 @@
 package com.finanzas.personales.controller;
 
-import com.finanzas.personales.dto.CuentaDTO;
-import com.finanzas.personales.dto.CuentaUpdateDTO;
-import com.finanzas.personales.dto.request.TransferenciaDTO;
+import com.finanzas.personales.dto.request.CuentaRequestDTO;
+import com.finanzas.personales.dto.request.CuentaUpdateRequestDTO;
+import com.finanzas.personales.dto.request.TransferenciaRequestDTO;
 import com.finanzas.personales.model.Cuenta;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.service.CuentaService;
@@ -23,7 +23,7 @@ public class CuentaController {
     }
 
     @PostMapping
-    public Cuenta crearCuenta(@Valid @RequestBody CuentaDTO dto, @AuthenticationPrincipal Usuario usuario) {
+    public Cuenta crearCuenta(@Valid @RequestBody CuentaRequestDTO dto, @AuthenticationPrincipal Usuario usuario) {
         return cuentaService.crearCuenta(dto, usuario);
     }
 
@@ -39,7 +39,7 @@ public class CuentaController {
 
 
     @PutMapping("/{id}")
-    public Cuenta actualizarCuenta(@PathVariable Long id, @Valid @RequestBody CuentaUpdateDTO dto, @AuthenticationPrincipal Usuario usuario) {
+    public Cuenta actualizarCuenta(@PathVariable Long id, @Valid @RequestBody CuentaUpdateRequestDTO dto, @AuthenticationPrincipal Usuario usuario) {
         return cuentaService.actualizarCuenta(id, dto, usuario.getId());
     }
 
@@ -49,7 +49,7 @@ public class CuentaController {
     }
 
     @PostMapping("/transferir")
-    public String transferir(@RequestBody TransferenciaDTO dto,
+    public String transferir(@RequestBody TransferenciaRequestDTO dto,
                              @AuthenticationPrincipal Usuario usuario) {
 
         cuentaService.transferir(dto, usuario.getId());

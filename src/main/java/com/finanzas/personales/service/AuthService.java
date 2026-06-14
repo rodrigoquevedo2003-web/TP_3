@@ -3,8 +3,8 @@ package com.finanzas.personales.service;
 import com.finanzas.personales.Exception.CredencialesInvalidasException;
 import com.finanzas.personales.Exception.EmailYaRegistradoException;
 import com.finanzas.personales.Exception.UsuarioNoEncontradoException;
-import com.finanzas.personales.dto.LoginDTO;
-import com.finanzas.personales.dto.RegisterDTO;
+import com.finanzas.personales.dto.request.LoginRequestDTO;
+import com.finanzas.personales.dto.request.RegisterRequestDTO;
 import com.finanzas.personales.dto.response.AuthResponseDTO;
 import com.finanzas.personales.enums.TipoCuenta;
 import com.finanzas.personales.enums.TipoMovimiento;
@@ -31,7 +31,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthResponseDTO registrar(RegisterDTO dto) {
+    public AuthResponseDTO registrar(RegisterRequestDTO dto) {
 
         if (usuarioRepository.existsByEmail(dto.getEmail())) {
             throw new EmailYaRegistradoException("El email ya está registrado");
@@ -60,7 +60,7 @@ public class AuthService {
         return new AuthResponseDTO(token, usuario.getEmail());
     }
 
-    public AuthResponseDTO login(LoginDTO dto) {
+    public AuthResponseDTO login(LoginRequestDTO dto) {
 
         Usuario usuario = usuarioRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado"));

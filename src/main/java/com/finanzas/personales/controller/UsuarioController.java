@@ -1,6 +1,6 @@
 package com.finanzas.personales.controller;
 
-import com.finanzas.personales.dto.ActualizarUsuarioDTO;
+import com.finanzas.personales.dto.request.ActualizarUsuarioRequestDTO;
 import com.finanzas.personales.dto.response.UsuarioResponseDTO;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.service.UsuarioService;
@@ -24,7 +24,7 @@ public class UsuarioController {
 
     @PutMapping("/actual")
     public UsuarioResponseDTO actualizarPerfil(@AuthenticationPrincipal Usuario usuario,
-                                               @Valid @RequestBody ActualizarUsuarioDTO dto) {
+                                               @Valid @RequestBody ActualizarUsuarioRequestDTO dto) {
         Usuario actualizado = usuarioService.actualizarPerfil(usuario.getEmail(), dto.getNombre());
         return new UsuarioResponseDTO(actualizado.getId(), actualizado.getNombre(), actualizado.getEmail());
     }

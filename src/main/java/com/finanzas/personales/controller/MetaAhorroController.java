@@ -1,6 +1,6 @@
 package com.finanzas.personales.controller;
 
-import com.finanzas.personales.dto.MovimientoMetaDTO;
+import com.finanzas.personales.dto.request.MovimientoMetaRequestDTO;
 import com.finanzas.personales.dto.request.MetaAhorroRequestDTO;
 import com.finanzas.personales.dto.response.MetaAhorroResponseDTO;
 import com.finanzas.personales.model.Usuario;
@@ -62,14 +62,14 @@ public class MetaAhorroController {
 
 
     @PostMapping("/{id}/depositar")
-    public ResponseEntity<MetaAhorroResponseDTO> depositar(@PathVariable Long id, @Valid @RequestBody MovimientoMetaDTO dto, @AuthenticationPrincipal Usuario usuarioAutenticado){
+    public ResponseEntity<MetaAhorroResponseDTO> depositar(@PathVariable Long id, @Valid @RequestBody MovimientoMetaRequestDTO dto, @AuthenticationPrincipal Usuario usuarioAutenticado){
 
         return ResponseEntity.ok(metaAhorroService.depositar(id, dto, usuarioAutenticado.getId()));
     }
 
 
     @PostMapping("/{id}/retirar")
-    public ResponseEntity<MetaAhorroResponseDTO> retirar(@PathVariable Long id, @Valid @RequestBody MovimientoMetaDTO dto, @AuthenticationPrincipal Usuario usuario){
+    public ResponseEntity<MetaAhorroResponseDTO> retirar(@PathVariable Long id, @Valid @RequestBody MovimientoMetaRequestDTO dto, @AuthenticationPrincipal Usuario usuario){
 
         return ResponseEntity.ok(metaAhorroService.retirar(id, dto, usuario.getId()));
     }

@@ -4,7 +4,7 @@ import com.finanzas.personales.Exception.CuentaNoEncontradaException;
 import com.finanzas.personales.Exception.MetaAhorroInexistenteException;
 import com.finanzas.personales.Exception.SaldoInsuficienteException;
 import com.finanzas.personales.Exception.UsuarioNoEncontradoException;
-import com.finanzas.personales.dto.MovimientoMetaDTO;
+import com.finanzas.personales.dto.request.MovimientoMetaRequestDTO;
 import com.finanzas.personales.dto.request.MetaAhorroRequestDTO;
 import com.finanzas.personales.dto.response.MetaAhorroResponseDTO;
 import com.finanzas.personales.enums.TipoMovimiento;
@@ -100,7 +100,7 @@ public class MetaAhorroService {
 
 
     @Transactional
-    public MetaAhorroResponseDTO depositar(Long metaId, MovimientoMetaDTO dto, Long usuarioId){
+    public MetaAhorroResponseDTO depositar(Long metaId, MovimientoMetaRequestDTO dto, Long usuarioId){
         MetaAhorro meta = obtenerMetaDelUsuario(metaId, usuarioId);
         Cuenta cuenta = resolverCuenta(dto.getCuentaId(), meta, usuarioId);
 
@@ -122,7 +122,7 @@ public class MetaAhorroService {
 
 
     @Transactional
-    public MetaAhorroResponseDTO retirar(Long metaId, MovimientoMetaDTO dto, Long usuarioId){
+    public MetaAhorroResponseDTO retirar(Long metaId, MovimientoMetaRequestDTO dto, Long usuarioId){
         MetaAhorro meta = obtenerMetaDelUsuario(metaId, usuarioId);
         Cuenta cuenta = resolverCuenta(dto.getCuentaId(), meta, usuarioId);
 

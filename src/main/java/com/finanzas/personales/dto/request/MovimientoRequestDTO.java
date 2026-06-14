@@ -1,4 +1,4 @@
-package com.finanzas.personales.dto;
+package com.finanzas.personales.dto.request;
 
 import com.finanzas.personales.enums.TipoMovimiento;
 import jakarta.validation.constraints.DecimalMin;
@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
-public class MovimientoDTO {
+public class MovimientoRequestDTO {
 
         @NotNull(message = "La cuenta es obligatoria")
         private Long cuentaId;

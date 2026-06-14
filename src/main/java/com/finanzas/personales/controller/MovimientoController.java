@@ -1,6 +1,6 @@
 package com.finanzas.personales.controller;
 
-import com.finanzas.personales.dto.MovimientoDTO;
+import com.finanzas.personales.dto.request.MovimientoRequestDTO;
 import com.finanzas.personales.model.Movimiento;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.service.MovimientoService;
@@ -22,7 +22,7 @@ public class MovimientoController {
 
 
     @PostMapping
-    public ResponseEntity<Movimiento> crearMovimiento(@Valid @RequestBody MovimientoDTO dto, @AuthenticationPrincipal Usuario usuario) {
+    public ResponseEntity<Movimiento> crearMovimiento(@Valid @RequestBody MovimientoRequestDTO dto, @AuthenticationPrincipal Usuario usuario) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(movimientoService.crearMovimiento(dto, usuario.getId()));
     }
@@ -54,7 +54,7 @@ public class MovimientoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Movimiento> editarMovimiento(@PathVariable Long id, @Valid @RequestBody MovimientoDTO dto, @AuthenticationPrincipal Usuario usuario) {
+    public ResponseEntity<Movimiento> editarMovimiento(@PathVariable Long id, @Valid @RequestBody MovimientoRequestDTO dto, @AuthenticationPrincipal Usuario usuario) {
         return ResponseEntity.ok(movimientoService.editarMovimiento(id, dto, usuario.getId()));
     }
 }

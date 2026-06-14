@@ -4,7 +4,7 @@ import com.finanzas.personales.Exception.CategoriaNoEncontradaException;
 import com.finanzas.personales.Exception.CuentaNoEncontradaException;
 import com.finanzas.personales.Exception.MovimientoNoEncontradoException;
 import com.finanzas.personales.Exception.SaldoInsuficienteException;
-import com.finanzas.personales.dto.MovimientoDTO;
+import com.finanzas.personales.dto.request.MovimientoRequestDTO;
 import com.finanzas.personales.model.Categoria;
 import com.finanzas.personales.model.Cuenta;
 import com.finanzas.personales.model.Movimiento;
@@ -30,7 +30,7 @@ public class MovimientoService {
 
 
     @Transactional
-    public Movimiento crearMovimiento(MovimientoDTO dto, Long usuarioId) {
+    public Movimiento crearMovimiento(MovimientoRequestDTO dto, Long usuarioId) {
 
         Cuenta cuenta = cuentaRepository.findByIdAndUsuarioId(dto.getCuentaId(), usuarioId)
                 .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada"));
@@ -125,7 +125,7 @@ public class MovimientoService {
 
 
     @Transactional
-    public Movimiento editarMovimiento(Long id, MovimientoDTO dto, Long usuarioId) {
+    public Movimiento editarMovimiento(Long id, MovimientoRequestDTO dto, Long usuarioId) {
         Movimiento movimiento = buscarPorIdYUsuario(id, usuarioId);
         Cuenta cuentaAnterior = movimiento.getCuenta();
 

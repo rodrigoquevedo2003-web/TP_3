@@ -1,9 +1,9 @@
 package com.finanzas.personales.service;
 
 import com.finanzas.personales.Exception.*;
-import com.finanzas.personales.dto.CuentaDTO;
-import com.finanzas.personales.dto.CuentaUpdateDTO;
-import com.finanzas.personales.dto.request.TransferenciaDTO;
+import com.finanzas.personales.dto.request.CuentaRequestDTO;
+import com.finanzas.personales.dto.request.CuentaUpdateRequestDTO;
+import com.finanzas.personales.dto.request.TransferenciaRequestDTO;
 import com.finanzas.personales.enums.TipoCuenta;
 import com.finanzas.personales.enums.TipoMovimiento;
 import com.finanzas.personales.model.Cuenta;
@@ -26,7 +26,7 @@ public class CuentaService {
     private final MovimientoService movimientoService;
 
 
-    public Cuenta crearCuenta(CuentaDTO dto, Usuario usuario) {
+    public Cuenta crearCuenta(CuentaRequestDTO dto, Usuario usuario) {
 
         if (dto.getTipoCuenta() == TipoCuenta.EFECTIVO) {
 
@@ -63,7 +63,7 @@ public class CuentaService {
                 .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada"));
     }
 
-    public Cuenta actualizarCuenta(Long id, CuentaUpdateDTO dto, Long usuarioId) {
+    public Cuenta actualizarCuenta(Long id, CuentaUpdateRequestDTO dto, Long usuarioId) {
         Cuenta cuenta = buscarPropia(id, usuarioId);
 
         cuenta.setNombre(dto.getNombre());
@@ -88,7 +88,7 @@ public class CuentaService {
     }
 
     @Transactional
-    public void transferir(TransferenciaDTO dto, Long usuarioId) {
+    public void transferir(TransferenciaRequestDTO dto, Long usuarioId) {
 
         if (dto.getMonto() == null ||dto.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
             throw new TransferenciaInvalidaException(

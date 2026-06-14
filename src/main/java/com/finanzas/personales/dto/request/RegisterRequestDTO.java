@@ -1,4 +1,4 @@
-package com.finanzas.personales.dto;
+package com.finanzas.personales.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class RegisterDTO {
+public class RegisterRequestDTO {
 
     @NotBlank
     private String nombre;
