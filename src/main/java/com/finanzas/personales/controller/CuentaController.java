@@ -7,6 +7,7 @@ import com.finanzas.personales.model.Cuenta;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.service.CuentaService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,13 +15,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/cuentas")
+@RequiredArgsConstructor
 public class CuentaController {
 
     private final CuentaService cuentaService;
 
-    public CuentaController(CuentaService cuentaService) {
-        this.cuentaService = cuentaService;
-    }
 
     @PostMapping
     public Cuenta crearCuenta(@Valid @RequestBody CuentaRequestDTO dto, @AuthenticationPrincipal Usuario usuario) {
@@ -49,7 +48,7 @@ public class CuentaController {
     }
 
     @PostMapping("/transferir")
-    public String transferir(@RequestBody TransferenciaRequestDTO dto,
+    public String transferir(@Valid @RequestBody TransferenciaRequestDTO dto,
                              @AuthenticationPrincipal Usuario usuario) {
 
         cuentaService.transferir(dto, usuario.getId());
