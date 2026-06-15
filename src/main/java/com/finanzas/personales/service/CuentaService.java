@@ -70,6 +70,12 @@ public class CuentaService {
     public Cuenta actualizarCuenta(Long id, CuentaUpdateRequestDTO dto, Long usuarioId) {
         Cuenta cuenta = buscarPropia(id, usuarioId);
 
+        // Validar que el nuevo nombre no esté duplicado (excepto si es el mismo nombre actual)
+        if (!cuenta.getNombre().equalsIgnoreCase(dto.getNombre()) &&
+            cuentaRepository.existsByUsuarioIdAndNombreIgnoreCase(usuarioId, dto.getNombre())) {
+            throw new ReglaNegocioException("Ya existe otra cuenta con ese nombre");
+        }
+
         cuenta.setNombre(dto.getNombre());
 
         if (cuenta.getTipoCuenta() != TipoCuenta.EFECTIVO && dto.getTipoCuenta() != null) {
@@ -138,8 +144,9 @@ public class CuentaService {
         cuentaRepository.save(origen);
         cuentaRepository.save(destino);
 
-        movimientoService.registrarMovimientoInterno(origen, TipoMovimiento.EGRESO,
-                "Transferencia enviada a " + destino.getNombre(), dto.getMonto());
+        // Registrar movimientos internos con presupuesto
+        movimientoService.registrarMovimientoInternoConPresupuesto(origen, TipoMovimiento.EGRESO,
+                "Transferencia enviada a " + destino.getNombre(), dto.getMonto(), usuarioId);
         movimientoService.registrarMovimientoInterno(destino, TipoMovimiento.INGRESO,
                 "Transferencia recibida de " + origen.getNombre(), dto.getMonto());
     }

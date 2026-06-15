@@ -218,4 +218,32 @@ public class MovimientoService {
         movimientoRepository.save(movimiento);
     }
 
+    @Transactional
+    public void registrarMovimientoInternoConPresupuesto(Cuenta cuenta, TipoMovimiento tipo, String descripcion, BigDecimal monto, Long usuarioId) {
+        Movimiento movimiento = new Movimiento();
+        movimiento.setCuenta(cuenta);
+
+        // Buscar categoría de transferencia
+        Categoria categoriaTransferencia = categoriaRepository.findByUsuarioIdAndTipo(usuarioId, tipo)
+                .stream()
+                .filter(c -> c.getNombre().equalsIgnoreCase("Transferencia Enviada") ||
+                           c.getNombre().equalsIgnoreCase("Transferencia Recibida") ||
+                           c.getNombre().equalsIgnoreCase("Transferencia enviada") ||
+                           c.getNombre().equalsIgnoreCase("Transferencia recibida"))
+                .findFirst()
+                .orElse(null);
+
+        movimiento.setCategoria(categoriaTransferencia);
+        movimiento.setTipo(tipo);
+        movimiento.setDescripcion(descripcion);
+        movimiento.setMonto(monto);
+        movimiento.setFecha(LocalDate.now());
+        movimientoRepository.save(movimiento);
+
+        // Registrar en presupuesto si tiene categoría
+        if (tipo == TipoMovimiento.EGRESO && categoriaTransferencia != null) {
+            presupuestoService.registrarGasto(usuarioId, categoriaTransferencia.getId(), LocalDate.now(), monto);
+        }
+    }
+
 }

@@ -83,6 +83,15 @@ public class PresupuestoService {
         Categoria categoria = categoriaRepository.findByIdAndUsuarioId(dto.getCategoriaId(), usuarioId)
                 .orElseThrow(() -> new CategoriaNoEncontradaException("Categoria no encontrada"));
 
+        // Validar que no exista otro presupuesto para la misma categoria/mes/año
+        boolean cambioMesAnioOCategoria = p.getMes() != dto.getMes() || p.getAnio() != dto.getAnio() || !p.getCategoria().getId().equals(categoria.getId());
+        if (cambioMesAnioOCategoria) {
+            presupuestoRepository.findByUsuarioIdAndCategoriaIdAndMesAndAnio(usuarioId, dto.getCategoriaId(), dto.getMes(), dto.getAnio())
+                    .ifPresent(duplicado -> {
+                        throw new ReglaNegocioException("Ya existe un presupuesto para esa categoria en ese mes/año");
+                    });
+        }
+
         p.setAnio(dto.getAnio());
         p.setCategoria(categoria);
         p.setMes(dto.getMes());

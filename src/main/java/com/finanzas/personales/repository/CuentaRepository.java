@@ -15,4 +15,6 @@ public interface CuentaRepository extends JpaRepository<Cuenta, Long> {
     Optional<Cuenta> findByIdAndUsuarioId(Long id, Long usuarioId);
 
     boolean existsByUsuarioIdAndTipoCuenta(Long usuarioId, TipoCuenta tipoCuenta);
+
+    boolean existsByUsuarioIdAndNombreIgnoreCase(Long usuarioId, String nombre);
 }
