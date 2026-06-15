@@ -1,18 +1,15 @@
 package com.finanzas.personales.service;
 
-import com.finanzas.personales.Exception.CuentaNoEncontradaException;
-import com.finanzas.personales.Exception.MetaAhorroInexistenteException;
-import com.finanzas.personales.Exception.SaldoInsuficienteException;
-import com.finanzas.personales.Exception.UsuarioNoEncontradoException;
+import com.finanzas.personales.Exception.*;
 import com.finanzas.personales.dto.request.MovimientoMetaRequestDTO;
 import com.finanzas.personales.dto.request.MetaAhorroRequestDTO;
 import com.finanzas.personales.dto.response.MetaAhorroResponseDTO;
 import com.finanzas.personales.enums.TipoMovimiento;
 import com.finanzas.personales.model.*;
 import com.finanzas.personales.repository.*;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -51,6 +48,7 @@ public class MetaAhorroService {
         return MetaAhorroResponseDTO.from(metaAhorroRepository.save(meta));
     }
 
+    @Transactional(readOnly = true)
     public List<MetaAhorroResponseDTO> listarPorUsuario(Long usuarioId) {
         return metaAhorroRepository.findByUsuarioId(usuarioId)
                 .stream()
@@ -58,6 +56,7 @@ public class MetaAhorroService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MetaAhorroResponseDTO> listarPorUsuarioYEstado(Long usuarioId, Boolean cumplida){
         return metaAhorroRepository.findByUsuarioIdAndCumplida(usuarioId, cumplida)
                 .stream()
@@ -65,6 +64,7 @@ public class MetaAhorroService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public MetaAhorroResponseDTO buscarPorId(Long metaId, Long usuarioId){
         MetaAhorro meta = obtenerMetaDelUsuario(metaId, usuarioId);
         return MetaAhorroResponseDTO.from(meta);
@@ -127,6 +127,14 @@ public class MetaAhorroService {
         Cuenta cuenta = resolverCuenta(dto.getCuentaId(), meta, usuarioId);
 
         BigDecimal monto = dto.getMonto();
+
+        if (monto == null || monto.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El monto a retirar debe ser mayor a cero");
+        }
+        if (monto.compareTo(meta.getMontoActual()) > 0) {
+            throw new SaldoMetaInsuficienteException(
+                    "No hay suficiente saldo en la meta para retirar ese monto");
+        }
 
         meta.retirar(monto);
 
