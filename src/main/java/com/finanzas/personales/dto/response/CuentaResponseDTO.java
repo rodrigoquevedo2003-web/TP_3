@@ -23,4 +23,5 @@ public class CuentaResponseDTO {
         dto.setTipoCuenta(cuenta.getTipoCuenta());
         dto.setActiva(cuenta.getActiva());
         return dto;
+    }
 }
