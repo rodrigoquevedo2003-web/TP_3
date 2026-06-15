@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -48,7 +49,7 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
-    @ExceptionHandler({SaldoInsuficienteException.class, PresupuestoExcedidoException.class, TransferenciaInvalidaException.class, CuentaEfectivoNoEliminableException.class})
+    @ExceptionHandler({SaldoInsuficienteException.class, PresupuestoExcedidoException.class, TransferenciaInvalidaException.class, CuentaEfectivoNoEliminableException.class, SaldoMetaInsuficienteException.class, CuentaInactivaException.class})
     public ResponseEntity<Map<String, Object>> handleReglasNegocio(RuntimeException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
@@ -91,10 +92,10 @@ public class GlobalExceptionHandler {
     }
 
     private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String mensaje) {
-        return ResponseEntity.status(status).body(Map.of(
-                "timestamp", LocalDateTime.now().toString(),
-                "status", status.value(),
-                "error", mensaje
-        ));
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now().toString());
+        body.put("status", status.value());
+        body.put("error", mensaje != null ? mensaje : status.getReasonPhrase());
+        return ResponseEntity.status(status).body(body);
     }
 }
