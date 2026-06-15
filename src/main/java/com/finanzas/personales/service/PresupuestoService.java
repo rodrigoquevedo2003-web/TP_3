@@ -4,15 +4,16 @@ package com.finanzas.personales.service;
 import com.finanzas.personales.Exception.CategoriaNoEncontradaException;
 import com.finanzas.personales.Exception.PresupuestoExcedidoException;
 import com.finanzas.personales.Exception.PresupuestoInexistenteException;
+import com.finanzas.personales.Exception.ReglaNegocioException;
 import com.finanzas.personales.dto.request.PresupuestoRequestDTO;
 import com.finanzas.personales.model.Categoria;
 import com.finanzas.personales.model.Presupuesto;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.repository.CategoriaRepository;
 import com.finanzas.personales.repository.PresupuestoRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.math.BigDecimal;
@@ -33,6 +34,11 @@ public class PresupuestoService {
         Categoria categoria = categoriaRepository.findByIdAndUsuarioId(dto.getCategoriaId(), usuario.getId())
                 .orElseThrow(() -> new CategoriaNoEncontradaException("Categoria no encontrada"));
 
+        presupuestoRepository.findByUsuarioIdAndCategoriaIdAndMesAndAnio(usuario.getId(), dto.getCategoriaId(), dto.getMes(), dto.getAnio())
+                .ifPresent(p -> {
+                    throw new ReglaNegocioException("Presupuesto existente para esa categoria en ese mes/año");
+                });
+
         Presupuesto p = new Presupuesto();
         p.setMontoLimite(dto.getMontoLimite());
         p.setMontoConsumido(BigDecimal.ZERO);
@@ -45,11 +51,13 @@ public class PresupuestoService {
     }
 
 
+    @Transactional(readOnly = true)
     public List<Presupuesto> listar(Long usuarioId) {
         return presupuestoRepository.findByUsuarioId(usuarioId);
     }
 
 
+    @Transactional(readOnly = true)
     public Presupuesto listarXid(Long id, Long usuarioId) {
         Presupuesto p = presupuestoRepository.findById(id)
                 .orElseThrow(() -> new PresupuestoInexistenteException("Presupuesto inexistente."));
@@ -60,6 +68,7 @@ public class PresupuestoService {
     }
 
 
+    @Transactional
     public Presupuesto eliminar(Long id, Long usuarioId) {
         Presupuesto p = listarXid(id, usuarioId);
         presupuestoRepository.delete(p);
@@ -87,10 +96,10 @@ public class PresupuestoService {
         presupuestoRepository
                 .findByUsuarioIdAndCategoriaIdAndMesAndAnio(usuarioId, categoriaId, fecha.getMonthValue(), fecha.getYear())
                 .ifPresent(p -> {
+                    BigDecimal consumidoActual = p.getMontoConsumido() != null ? p.getMontoConsumido() : BigDecimal.ZERO;
                     BigDecimal nuevoConsumido = p.getMontoConsumido().add(monto);
                     if (nuevoConsumido.compareTo(p.getMontoLimite()) > 0) {
-                        throw new PresupuestoExcedidoException(
-                                "El gasto supera el límite del presupuesto de la categoría para ese mes");
+                        throw new PresupuestoExcedidoException("El gasto supera el límite del presupuesto de la categoría para ese mes");
                     }
                     p.setMontoConsumido(nuevoConsumido);
                     presupuestoRepository.save(p);
@@ -102,6 +111,7 @@ public class PresupuestoService {
         presupuestoRepository
                 .findByUsuarioIdAndCategoriaIdAndMesAndAnio(usuarioId, categoriaId, fecha.getMonthValue(), fecha.getYear())
                 .ifPresent(p -> {
+                    BigDecimal consumidoActual = p.getMontoConsumido() != null ? p.getMontoConsumido() : BigDecimal.ZERO;
                     BigDecimal nuevoConsumido = p.getMontoConsumido().subtract(monto);
                     if (nuevoConsumido.compareTo(BigDecimal.ZERO) < 0) {
                         nuevoConsumido = BigDecimal.ZERO;
