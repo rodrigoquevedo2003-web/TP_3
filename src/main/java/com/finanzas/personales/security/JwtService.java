@@ -2,10 +2,12 @@ package com.finanzas.personales.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Service
@@ -17,8 +19,17 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private Long expiration;
 
+    @PostConstruct
+    public void validarSecret() {
+        if (secret == null || secret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException(
+                    "JWT_SECRET debe tener al menos 32 bytes (256 bits) para HMAC-SHA256. " +
+                            "Configurá una clave más larga en la variable de entorno JWT_SECRET.");
+        }
+    }
+
     private SecretKey getKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     public String generarToken(String email) {
@@ -43,7 +54,7 @@ public class JwtService {
         try {
             Jwts.parser().verifyWith(getKey()).build().parseSignedClaims(token);
             return true;
-        } catch (JwtException e) {
+        } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
