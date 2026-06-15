@@ -19,17 +19,17 @@ public class Presupuesto {
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(precision = 10, scale = 2)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal montoLimite;
 
-    @Column(precision = 10, scale = 2)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal montoConsumido;
 
-    @Basic
-    private int mes;
+    @Column(nullable = false)
+    private Integer mes;
 
-    @Basic
-    private int anio;
+    @Column(nullable = false)
+    private Integer anio;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
