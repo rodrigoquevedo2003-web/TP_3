@@ -26,6 +26,7 @@ public class CuentaService {
     private final MovimientoService movimientoService;
 
 
+    @Transactional
     public Cuenta crearCuenta(CuentaRequestDTO dto, Usuario usuario) {
 
         if (dto.getTipoCuenta() == TipoCuenta.EFECTIVO) {
@@ -54,15 +55,18 @@ public class CuentaService {
         return cuentaRepository.save(cuenta);
     }
 
+    @Transactional(readOnly = true)
     public List<Cuenta> listarPorUsuario(Long usuarioId) {
         return cuentaRepository.findByUsuarioId(usuarioId);
     }
 
+    @Transactional(readOnly = true)
     public Cuenta buscarPropia(Long id, Long usuarioId) {
         return cuentaRepository.findByIdAndUsuarioId(id, usuarioId)
                 .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada"));
     }
 
+    @Transactional
     public Cuenta actualizarCuenta(Long id, CuentaUpdateRequestDTO dto, Long usuarioId) {
         Cuenta cuenta = buscarPropia(id, usuarioId);
 
@@ -75,6 +79,7 @@ public class CuentaService {
         return cuentaRepository.save(cuenta);
     }
 
+    @Transactional
     public void eliminarCuenta(Long id, Long usuarioId) {
         Cuenta cuenta = buscarPropia(id, usuarioId);
 
@@ -82,6 +87,11 @@ public class CuentaService {
             throw new CuentaEfectivoNoEliminableException(
                     "La cuenta de efectivo no se puede eliminar"
             );
+        }
+
+        if (cuenta.getMovimientos() != null && !cuenta.getMovimientos().isEmpty()) {
+            throw new ReglaNegocioException(
+                    "No se puede eliminar una cuenta con movimientos asociados. " + "Considera desactivarla en lugar de eliminarla.");
         }
 
         cuentaRepository.delete(cuenta);
@@ -106,21 +116,13 @@ public class CuentaService {
             );
         }
 
-        Cuenta origen = cuentaRepository.findById(dto.getCuentaOrigenId())
+        Cuenta origen = cuentaRepository.findByIdAndUsuarioId(dto.getCuentaOrigenId(), usuarioId)
                 .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta origen no encontrada"));
 
-        if (!origen.getUsuario().getId().equals(usuarioId)) {
-            throw new CuentaNoEncontradaException(
-                    "La cuenta origen no pertenece al usuario"
-            );
-        }
 
-        Cuenta destino = cuentaRepository.findById(dto.getCuentaDestinoId())
+        Cuenta destino = cuentaRepository.findByIdAndUsuarioId(dto.getCuentaDestinoId(), usuarioId)
                 .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta destino no encontrada"));
 
-        if (!destino.getUsuario().getId().equals(usuarioId)) {
-            throw new CuentaNoEncontradaException("La cuenta destino no pertenece al usuario");
-        }
 
         if(Boolean.FALSE.equals(origen.getActiva()) || Boolean.FALSE.equals(destino.getActiva())){
             throw new TransferenciaInvalidaException("No es posible operar con una cuenta inactiva");
