@@ -9,9 +9,9 @@ import com.finanzas.personales.enums.TipoMovimiento;
 import com.finanzas.personales.model.Categoria;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.repository.CategoriaRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,6 +21,7 @@ public class CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
 
+    @Transactional
     public CategoriaResponseDTO crear(CategoriaRequestDTO dto, Usuario usuario){
         if(categoriaRepository.existsByUsuarioIdAndNombreIgnoreCase(usuario.getId(), dto.getNombre())){
             throw new ReglaNegocioException("Ya existe una categoria con ese nombre");
@@ -36,6 +37,7 @@ public class CategoriaService {
         return CategoriaResponseDTO.from(categoriaRepository.save(categoria));
     }
 
+    @Transactional(readOnly = true)
     public List<CategoriaResponseDTO> listar(Long usuarioId){
         return categoriaRepository.findByUsuarioId(usuarioId)
                 .stream()
@@ -43,6 +45,7 @@ public class CategoriaService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<CategoriaResponseDTO> listarPorTipo(Long usuarioId, TipoMovimiento tipo){
         return categoriaRepository.findByUsuarioIdAndTipo(usuarioId, tipo)
                 .stream()
@@ -50,6 +53,7 @@ public class CategoriaService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public CategoriaResponseDTO buscarPorId(Long id, Long usuarioId){
         Categoria categoria = obtenerOLanzar(id);
         verificarPropietario(categoria, usuarioId);
@@ -60,6 +64,11 @@ public class CategoriaService {
     public CategoriaResponseDTO actualizar(Long id, CategoriaRequestDTO dto, Long usuarioId){
         Categoria categoria = obtenerOLanzar(id);
         verificarPropietario(categoria, usuarioId);
+
+        boolean tieneMovimientos = categoria.getMovimientos() != null && !categoria.getMovimientos().isEmpty();
+        if (tieneMovimientos && categoria.getTipo() != dto.getTipo()) {
+            throw new ReglaNegocioException("No se puede cambiar el tipo de una categoria que ya tiene movimientos asociados");
+        }
 
         boolean nombreCambio = !categoria.getNombre().equalsIgnoreCase(dto.getNombre());
 
@@ -79,6 +88,10 @@ public class CategoriaService {
     public void eliminar(Long id, Long usuarioId){
         Categoria categoria = obtenerOLanzar(id);
         verificarPropietario(categoria, usuarioId);
+
+        if (Boolean.TRUE.equals(categoria.getEsDefault())) {
+            throw new ReglaNegocioException("No se puede eliminar una categoria por defecto del sistema");
+        }
 
         if(categoria.getMovimientos() != null && !categoria.getMovimientos().isEmpty()){
             throw new CategoriaEnUsoException("No se puede eliminar la categoria porque tiene " + categoria.getMovimientos().size() + " movimientos asociados. Reasigna los movimientos a otra categoria para eliminar " + categoria.getNombre());
