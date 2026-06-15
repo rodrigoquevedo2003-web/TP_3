@@ -1,7 +1,7 @@
 package com.finanzas.personales.controller;
 
 import com.finanzas.personales.dto.request.MovimientoRequestDTO;
-import com.finanzas.personales.model.Movimiento;
+import com.finanzas.personales.dto.response.MovimientoResponseDTO;
 import com.finanzas.personales.model.Usuario;
 import com.finanzas.personales.service.MovimientoService;
 import jakarta.validation.Valid;
@@ -22,29 +22,41 @@ public class MovimientoController {
 
 
     @PostMapping
-    public ResponseEntity<Movimiento> crearMovimiento(@Valid @RequestBody MovimientoRequestDTO dto, @AuthenticationPrincipal Usuario usuario) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(movimientoService.crearMovimiento(dto, usuario.getId()));
+    public ResponseEntity<MovimientoResponseDTO> crearMovimiento(@Valid @RequestBody MovimientoRequestDTO dto, @AuthenticationPrincipal Usuario usuario) {
+        MovimientoResponseDTO creado = MovimientoResponseDTO.from(movimientoService.crearMovimiento(dto, usuario.getId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 
     @GetMapping
-    public ResponseEntity<List<Movimiento>> listarMovimientos(@AuthenticationPrincipal Usuario usuario) {
-        return ResponseEntity.ok(movimientoService.listarMovimientosPorUsuario(usuario.getId()));
+    public ResponseEntity<List<MovimientoResponseDTO>> listarMovimientos(@AuthenticationPrincipal Usuario usuario) {
+        List<MovimientoResponseDTO> movimientos = movimientoService.listarMovimientosPorUsuario(usuario.getId())
+                .stream()
+                .map(MovimientoResponseDTO::from)
+                .toList();
+        return ResponseEntity.ok(movimientos);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Movimiento> buscarPorId(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
-        return ResponseEntity.ok(movimientoService.buscarPorIdYUsuario(id, usuario.getId()));
+    public ResponseEntity<MovimientoResponseDTO> buscarPorId(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(MovimientoResponseDTO.from(movimientoService.buscarPorIdYUsuario(id, usuario.getId())));
     }
 
     @GetMapping("/cuenta/{cuentaId}")
-    public ResponseEntity<List<Movimiento>> listarPorCuenta(@PathVariable Long cuentaId, @AuthenticationPrincipal Usuario usuario) {
-        return ResponseEntity.ok(movimientoService.listarPorCuentaYUsuario(cuentaId, usuario.getId()));
+    public ResponseEntity<List<MovimientoResponseDTO>> listarPorCuenta(@PathVariable Long cuentaId, @AuthenticationPrincipal Usuario usuario) {
+        List<MovimientoResponseDTO> movimientos = movimientoService.listarPorCuentaYUsuario(cuentaId, usuario.getId())
+                .stream()
+                .map(MovimientoResponseDTO::from)
+                .toList();
+        return ResponseEntity.ok(movimientos);
     }
 
     @GetMapping("/categoria/{categoriaId}")
-    public ResponseEntity<List<Movimiento>> listarPorCategoria(@PathVariable Long categoriaId, @AuthenticationPrincipal Usuario usuario) {
-        return ResponseEntity.ok(movimientoService.listarPorCategoriaYUsuario(categoriaId, usuario.getId()));
+    public ResponseEntity<List<MovimientoResponseDTO>> listarPorCategoria(@PathVariable Long categoriaId, @AuthenticationPrincipal Usuario usuario) {
+        List<MovimientoResponseDTO> movimientos = movimientoService.listarPorCategoriaYUsuario(categoriaId, usuario.getId())
+                .stream()
+                .map(MovimientoResponseDTO::from)
+                .toList();
+        return ResponseEntity.ok(movimientos);
     }
 
     @DeleteMapping("/{id}")
@@ -54,7 +66,7 @@ public class MovimientoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Movimiento> editarMovimiento(@PathVariable Long id, @Valid @RequestBody MovimientoRequestDTO dto, @AuthenticationPrincipal Usuario usuario) {
-        return ResponseEntity.ok(movimientoService.editarMovimiento(id, dto, usuario.getId()));
+    public ResponseEntity<MovimientoResponseDTO> editarMovimiento(@PathVariable Long id, @Valid @RequestBody MovimientoRequestDTO dto, @AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(MovimientoResponseDTO.from(movimientoService.editarMovimiento(id, dto, usuario.getId())));
     }
 }
