@@ -1,9 +1,6 @@
 package com.finanzas.personales.service;
 
-import com.finanzas.personales.Exception.CategoriaNoEncontradaException;
-import com.finanzas.personales.Exception.CuentaNoEncontradaException;
-import com.finanzas.personales.Exception.MovimientoNoEncontradoException;
-import com.finanzas.personales.Exception.SaldoInsuficienteException;
+import com.finanzas.personales.Exception.*;
 import com.finanzas.personales.dto.request.MovimientoRequestDTO;
 import com.finanzas.personales.model.Categoria;
 import com.finanzas.personales.model.Cuenta;
@@ -35,8 +32,17 @@ public class MovimientoService {
         Cuenta cuenta = cuentaRepository.findByIdAndUsuarioId(dto.getCuentaId(), usuarioId)
                 .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada"));
 
+        if (Boolean.FALSE.equals(cuenta.getActiva())) {
+            throw new CuentaInactivaException("No es posible operar con una cuenta inactiva");
+        }
+
         Categoria categoria = categoriaRepository.findByIdAndUsuarioId(dto.getCategoriaId(), usuarioId)
                 .orElseThrow(() -> new CategoriaNoEncontradaException("Categoria no encontrada"));
+
+        if (categoria.getTipo() != dto.getTipo()) {
+            throw new CategoriaNoEncontradaException(
+                    "La categoria no corresponde al tipo de movimiento: " + dto.getTipo());
+        }
 
         LocalDate fecha = dto.getFecha() != null ? dto.getFecha() : LocalDate.now();
 
@@ -83,8 +89,7 @@ public class MovimientoService {
 
 
     public List<Movimiento> listarPorCuentaYUsuario(Long cuentaId, Long usuarioId) {
-
-        Cuenta cuenta = cuentaRepository.findByIdAndUsuarioId(cuentaId, usuarioId)
+        cuentaRepository.findByIdAndUsuarioId(cuentaId, usuarioId)
                 .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada"));
 
         return movimientoRepository.findByCuentaId(cuentaId);
@@ -126,6 +131,11 @@ public class MovimientoService {
 
     @Transactional
     public Movimiento editarMovimiento(Long id, MovimientoRequestDTO dto, Long usuarioId) {
+
+        if (dto.getCuentaId() == null) {
+            throw new CuentaNoEncontradaException("La cuenta es obligatoria");
+        }
+
         Movimiento movimiento = buscarPorIdYUsuario(id, usuarioId);
         Cuenta cuentaAnterior = movimiento.getCuenta();
 
@@ -135,13 +145,13 @@ public class MovimientoService {
         BigDecimal montoAnterior = movimiento.getMonto();
 
 
-        if (movimiento.getTipo() == TipoMovimiento.INGRESO) {
+        if (tipoAnterior == TipoMovimiento.INGRESO) {
             if (cuentaAnterior.getSaldo().compareTo(movimiento.getMonto()) < 0) {
                 throw new SaldoInsuficienteException("No se puede modificar: el saldo actual es menor al monto del movimiento original");
             }
-            cuentaAnterior.setSaldo(cuentaAnterior.getSaldo().subtract(movimiento.getMonto()));
+            cuentaAnterior.setSaldo(cuentaAnterior.getSaldo().subtract(montoAnterior));
         } else {
-            cuentaAnterior.setSaldo(cuentaAnterior.getSaldo().add(movimiento.getMonto()));
+            cuentaAnterior.setSaldo(cuentaAnterior.getSaldo().add(montoAnterior));
         }
 
         Cuenta cuentaNueva;
@@ -153,8 +163,22 @@ public class MovimientoService {
                     .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada"));
         }
 
-        if (dto.getTipo() == TipoMovimiento.EGRESO
-                && cuentaNueva.getSaldo().compareTo(dto.getMonto()) < 0) {
+        if (Boolean.FALSE.equals(cuentaNueva.getActiva())) {
+            throw new CuentaInactivaException("No es posible operar con una cuenta inactiva");
+        }
+
+        Categoria categoria = categoriaRepository.findByIdAndUsuarioId(dto.getCategoriaId(), usuarioId)
+                .orElseThrow(() -> new CategoriaNoEncontradaException("Categoria no encontrada"));
+
+
+        if (categoria.getTipo() != dto.getTipo()) {
+            throw new CategoriaNoEncontradaException(
+                    "La categoria no corresponde al tipo de movimiento: " + dto.getTipo());
+        }
+
+        LocalDate fechaNueva = dto.getFecha() != null ? dto.getFecha() : movimiento.getFecha();
+
+        if (dto.getTipo() == TipoMovimiento.EGRESO && cuentaNueva.getSaldo().compareTo(dto.getMonto()) < 0) {
             throw new SaldoInsuficienteException("Saldo insuficiente en la cuenta");
         }
 
@@ -163,11 +187,6 @@ public class MovimientoService {
         } else {
             cuentaNueva.setSaldo(cuentaNueva.getSaldo().subtract(dto.getMonto()));
         }
-
-        Categoria categoria = categoriaRepository.findByIdAndUsuarioId(dto.getCategoriaId(), usuarioId)
-                .orElseThrow(() -> new CategoriaNoEncontradaException("Categoria no encontrada"));
-
-        LocalDate fechaNueva = dto.getFecha() != null ? dto.getFecha() : movimiento.getFecha();
 
         if (tipoAnterior == TipoMovimiento.EGRESO && categoriaAnteriorId != null) {
             presupuestoService.revertirGasto(usuarioId, categoriaAnteriorId, fechaAnterior, montoAnterior);
