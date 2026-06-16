@@ -18,7 +18,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/presupuesto")
+@RequestMapping("/presupuestos")
 @RequiredArgsConstructor
 public class PresupuestoController {
 

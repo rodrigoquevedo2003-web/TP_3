@@ -37,7 +37,7 @@ Cada usuario se registra y opera de forma aislada sobre sus propios datos. El si
 
 ---
 
-## 🛠 Tecnologías utilizadas
+##  Tecnologías utilizadas
 
 | Categoría | Tecnología |
 |-----------|------------|
@@ -52,7 +52,6 @@ Cada usuario se registra y opera de forma aislada sobre sus propios datos. El si
 | IA | Google Gemini API |
 | Utilidades | Lombok |
 | Build | Maven |
-| Testing | JUnit 5, Mockito, Spring Security Test |
 
 ---
 
@@ -231,7 +230,7 @@ src/main/java/com/finanzas/personales/
 
 ---
 
-## 📨 Ejemplos de requests y responses
+##  Ejemplos de requests y responses
 
 ### Registro
 **POST** `/auth/register`
@@ -336,7 +335,7 @@ Al registrarse, el usuario obtiene automáticamente una **cuenta de efectivo** y
 
 ### Cómo autenticarse en Swagger
 1. Ejecutar `POST /auth/register` o `/auth/login` y copiar el `token`.
-2. Click en **Authorize** 🔓 (arriba a la derecha) y pegar el token.
+2. Click en **Authorize**  (arriba a la derecha) y pegar el token.
 3. Ya se pueden probar los endpoints protegidos.
 
 ---
@@ -359,7 +358,7 @@ directamente desde el navegador.
 
 ---
 
-## ⚠ Aclaraciones importantes para la corrección
+##  Aclaraciones importantes para la corrección
 
 - **Variables de entorno obligatorias:** la app **no arranca** sin `DB_PASSWORD` y
   `JWT_SECRET`. Las funciones de IA y email requieren además `GEMINI_API_KEY` y
@@ -371,5 +370,3 @@ directamente desde el navegador.
   ajustar temporalmente la expresión cron a cada minuto.
 - **APIs externas:** cotizaciones (DolarAPI) y cripto (CoinGecko) son públicas y no
   requieren API key. El análisis con IA sí requiere `GEMINI_API_KEY`.
-- **Tests:** se ejecutan con `./mvnw test` usando una base **H2 en memoria** (no necesita
-  MySQL ni variables de entorno).
