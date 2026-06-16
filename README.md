@@ -66,7 +66,7 @@ Cada usuario se registra y opera de forma aislada sobre sus propios datos. El si
 
 1. Clonar el repositorio:
    ```bash
-   git clone <url-del-repo>
+   git clone https://github.com/rodrigoquevedo2003-web/TP_3.git
    cd TP_3
    ```
 
@@ -193,14 +193,14 @@ src/main/java/com/finanzas/personales/
 | PUT | `/movimientos/{id}` | Edita un movimiento |
 | DELETE | `/movimientos/{id}` | Elimina un movimiento |
 
-### Presupuestos — `/presupuesto`
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/presupuesto` | Crea un presupuesto |
-| GET | `/presupuesto` | Lista los presupuestos |
-| GET | `/presupuesto/{id}` | Obtiene un presupuesto |
-| PUT | `/presupuesto/{id}` | Actualiza un presupuesto |
-| DELETE | `/presupuesto/{id}` | Elimina un presupuesto |
+### Presupuestos — `/presupuestos`
+| Método | Ruta                 | Descripción |
+|--------|----------------------|-------------|
+| POST | `/presupuestos`      | Crea un presupuesto |
+| GET | `/presupuestos`      | Lista los presupuestos |
+| GET | `/presupuestos/{id}` | Obtiene un presupuesto |
+| PUT | `/presupuestos/{id}` | Actualiza un presupuesto |
+| DELETE | `/presupuestos/{id}` | Elimina un presupuesto |
 
 ### Metas de ahorro — `/metas-ahorro`
 | Método | Ruta | Descripción |
@@ -221,12 +221,12 @@ src/main/java/com/finanzas/personales/
 | DELETE | `/reglas-recurrentes/{id}` | Desactiva una regla |
 
 ### Integraciones externas
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/analisis` | Análisis financiero del usuario generado con IA (Gemini) |
+| Método | Ruta                    | Descripción |
+|--------|-------------------------|-------------|
+| GET | `/analisis`             | Análisis financiero del usuario generado con IA (Gemini) |
 | GET | `/cotizaciones/dolares` | Cotizaciones del dólar (oficial, blue, MEP, etc.) |
 | GET | `/cotizaciones/divisas` | Cotizaciones de otras divisas (euro, real, etc.) |
-| GET | `/cripto` | Precios de las principales criptomonedas |
+| GET | `/criptos`              | Precios de las principales criptomonedas |
 
 ---
 
