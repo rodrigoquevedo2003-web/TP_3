@@ -55,7 +55,7 @@ Cada usuario se registra y opera de forma aislada sobre sus propios datos. El si
 
 ---
 
-## ▶ Instrucciones para ejecutar el proyecto
+## Instrucciones para ejecutar el proyecto
 
 ### Requisitos previos
 - **JDK 17 o superior**
@@ -354,7 +354,7 @@ directamente desde el navegador.
 
 ##  Enlace al despliegue
 
->
+> Completar cuando el despligue este hecho
 
 ---
 
