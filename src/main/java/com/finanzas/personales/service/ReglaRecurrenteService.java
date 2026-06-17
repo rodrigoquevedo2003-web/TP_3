@@ -30,7 +30,6 @@ public class ReglaRecurrenteService {
     private final ReglaRecurrenteProcessor processor;
 
     @Scheduled(cron = "0 0 6 * * *")
-    @Transactional
     public void ejecutarReglasVencidas() {
         LocalDate hoy = LocalDate.now();
         log.info("[Scheduler] Verificando reglas recurrentes para la fecha: {}", hoy);
@@ -48,7 +47,8 @@ public class ReglaRecurrenteService {
         int exitosas = 0;
         for (ReglaRecurrente regla : reglasPendientes) {
             try {
-                processor.procesarReglaIndividual(regla, hoy);
+                // 2. CAMBIADO: Ahora le enviamos regla.getId() en lugar del objeto completo
+                processor.procesarReglaIndividual(regla.getId(), hoy);
                 exitosas++;
             } catch (org.springframework.dao.DataAccessException e) {
                 log.error("[Scheduler] ✗ Error de base de datos en regla ID={}: {}", regla.getId(), e.getMessage());

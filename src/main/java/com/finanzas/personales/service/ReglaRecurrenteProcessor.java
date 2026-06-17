@@ -1,8 +1,6 @@
 package com.finanzas.personales.service;
 
-import com.finanzas.personales.model.Movimiento;
 import com.finanzas.personales.model.ReglaRecurrente;
-import com.finanzas.personales.repository.MovimientoRepository;
 import com.finanzas.personales.repository.ReglaRecurrenteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,28 +15,34 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class ReglaRecurrenteProcessor {
 
-    private final MovimientoRepository movimientoRepo;
     private final ReglaRecurrenteRepository reglaRepo;
+    private final MovimientoService movimientoService;
     private final EmailService emailService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void procesarReglaIndividual(ReglaRecurrente regla, LocalDate hoy) {
+    public void procesarReglaIndividual(Long reglaId, LocalDate hoy) {
+
+        ReglaRecurrente regla = reglaRepo.findById(reglaId)
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException(
+                        "Regla no encontrada con ID: " + reglaId));
+
         crearMovimientoDesdeRegla(regla, hoy);
         avanzarProximaEjecucion(regla, hoy);
+
         log.info("[Scheduler] ✓ Movimiento creado para regla ID={} | cuenta='{}' | monto={}",
                 regla.getId(), regla.getCuenta().getNombre(), regla.getMonto());
+
         notificarPorEmail(regla, hoy);
     }
 
     private void crearMovimientoDesdeRegla(ReglaRecurrente regla, LocalDate fecha) {
-        Movimiento movimiento = new Movimiento();
-        movimiento.setCuenta(regla.getCuenta());
-        movimiento.setCategoria(regla.getCategoria());
-        movimiento.setTipo(regla.getTipo());
-        movimiento.setDescripcion(regla.getDescripcion() + " (automático)");
-        movimiento.setMonto(regla.getMonto());
-        movimiento.setFecha(fecha);
-        movimientoRepo.save(movimiento);
+        movimientoService.crearMovimientoDesdeRegla(
+                regla.getCuenta(),
+                regla.getCategoria(),
+                regla.getTipo(),
+                regla.getDescripcion() + " (automático)",
+                regla.getMonto(),
+                fecha);
     }
 
     private void avanzarProximaEjecucion(ReglaRecurrente regla, LocalDate hoy) {
@@ -51,6 +55,8 @@ public class ReglaRecurrenteProcessor {
             proxima = proxima.plusDays(regla.getFrecuenciaDias());
         }
         regla.setProximaEjecucion(proxima);
+
+
         reglaRepo.save(regla);
     }
 

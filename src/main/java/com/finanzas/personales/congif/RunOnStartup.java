@@ -7,16 +7,18 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+
 @Slf4j
 @RequiredArgsConstructor
 @Component
-@Profile("!test") // No se ejecuta si el profile "test" está activo
+@Profile("!test")
 public class RunOnStartup implements CommandLineRunner {
 
     private final ReglaRecurrenteService reglaService;
 
     @Override
-    public void run(String... args) {
+    @SuppressWarnings("NullableProblems")
+    public void run( String... args) {
         log.info("=================================================");
         log.info("🤖 EJECUTANDO CONTROL DE REGLAS RECURRENTES AL INICIAR...");
 

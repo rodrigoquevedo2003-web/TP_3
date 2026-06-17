@@ -32,10 +32,6 @@ public class MovimientoService {
         Cuenta cuenta = cuentaRepository.findByIdAndUsuarioId(dto.getCuentaId(), usuarioId)
                 .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada"));
 
-        if (Boolean.FALSE.equals(cuenta.getActiva())) {
-            throw new CuentaInactivaException("No es posible operar con una cuenta inactiva");
-        }
-
         Categoria categoria = categoriaRepository.findByIdAndUsuarioId(dto.getCategoriaId(), usuarioId)
                 .orElseThrow(() -> new CategoriaNoEncontradaException("Categoria no encontrada"));
 
@@ -46,29 +42,49 @@ public class MovimientoService {
 
         LocalDate fecha = dto.getFecha() != null ? dto.getFecha() : LocalDate.now();
 
-        if (dto.getTipo() == TipoMovimiento.EGRESO
-                && cuenta.getSaldo().compareTo(dto.getMonto()) < 0) {
+        return aplicarMovimiento(cuenta, categoria, dto.getTipo(), dto.getDescripcion(),
+                dto.getMonto(), fecha, usuarioId);
+    }
+
+
+    private Movimiento aplicarMovimiento(Cuenta cuenta, Categoria categoria, TipoMovimiento tipo,
+                                         String descripcion, BigDecimal monto, LocalDate fecha,
+                                         Long usuarioId) {
+
+        if (Boolean.FALSE.equals(cuenta.getActiva())) {
+            throw new CuentaInactivaException("No es posible operar con una cuenta inactiva");
+        }
+
+        if (tipo == TipoMovimiento.EGRESO && cuenta.getSaldo().compareTo(monto) < 0) {
             throw new SaldoInsuficienteException("Saldo insuficiente en la cuenta");
         }
 
         Movimiento movimiento = new Movimiento();
         movimiento.setCuenta(cuenta);
         movimiento.setCategoria(categoria);
-        movimiento.setTipo(dto.getTipo());
-        movimiento.setDescripcion(dto.getDescripcion());
-        movimiento.setMonto(dto.getMonto());
+        movimiento.setTipo(tipo);
+        movimiento.setDescripcion(descripcion);
+        movimiento.setMonto(monto);
         movimiento.setFecha(fecha);
 
-        if (dto.getTipo() == TipoMovimiento.INGRESO) {
-            cuenta.setSaldo(cuenta.getSaldo().add(dto.getMonto()));
-        }else{
-            cuenta.setSaldo(cuenta.getSaldo().subtract(dto.getMonto()));
-            presupuestoService.registrarGasto(usuarioId, categoria.getId(), fecha, dto.getMonto());
+        if (tipo == TipoMovimiento.INGRESO) {
+            cuenta.setSaldo(cuenta.getSaldo().add(monto));
+        } else {
+            cuenta.setSaldo(cuenta.getSaldo().subtract(monto));
+            presupuestoService.registrarGasto(usuarioId, categoria.getId(), fecha, monto);
         }
 
         cuentaRepository.save(cuenta);
-
         return movimientoRepository.save(movimiento);
+    }
+
+
+    @Transactional
+    @SuppressWarnings("UnusedReturnValue")
+    public Movimiento crearMovimientoDesdeRegla(Cuenta cuenta, Categoria categoria, TipoMovimiento tipo,
+                                                String descripcion, BigDecimal monto, LocalDate fecha) {
+        Long usuarioId = cuenta.getUsuario().getId();
+        return aplicarMovimiento(cuenta, categoria, tipo, descripcion, monto, fecha, usuarioId);
     }
 
 
@@ -227,9 +243,9 @@ public class MovimientoService {
         Categoria categoriaTransferencia = categoriaRepository.findByUsuarioIdAndTipo(usuarioId, tipo)
                 .stream()
                 .filter(c -> c.getNombre().equalsIgnoreCase("Transferencia Enviada") ||
-                           c.getNombre().equalsIgnoreCase("Transferencia Recibida") ||
-                           c.getNombre().equalsIgnoreCase("Transferencia enviada") ||
-                           c.getNombre().equalsIgnoreCase("Transferencia recibida"))
+                        c.getNombre().equalsIgnoreCase("Transferencia Recibida") ||
+                        c.getNombre().equalsIgnoreCase("Transferencia enviada") ||
+                        c.getNombre().equalsIgnoreCase("Transferencia recibida"))
                 .findFirst()
                 .orElse(null);
 

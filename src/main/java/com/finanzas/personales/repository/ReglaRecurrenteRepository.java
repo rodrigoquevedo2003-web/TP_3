@@ -32,6 +32,7 @@ public interface ReglaRecurrenteRepository extends JpaRepository<ReglaRecurrente
     JOIN FETCH c.usuario
     JOIN FETCH r.categoria
     WHERE r.activa = true AND r.proximaEjecucion <= :fecha
+    ORDER BY r.id ASC
     """)
     List<ReglaRecurrente> findByActivaTrueAndProximaEjecucionLessThanEqual(@Param("fecha") LocalDate fecha);
 
