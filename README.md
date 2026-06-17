@@ -224,6 +224,7 @@ src/main/java/com/finanzas/personales/
 | Método | Ruta                    | Descripción |
 |--------|-------------------------|-------------|
 | GET | `/analisis`             | Análisis financiero del usuario generado con IA (Gemini) |
+| GET | `/analisis/periodo`     | Análisis financiero de un período (params `desde` y `hasta`, formato `YYYY-MM-DD`) |
 | GET | `/cotizaciones/dolares` | Cotizaciones del dólar (oficial, blue, MEP, etc.) |
 | GET | `/cotizaciones/divisas` | Cotizaciones de otras divisas (euro, real, etc.) |
 | GET | `/criptos`              | Precios de las principales criptomonedas |
@@ -299,7 +300,14 @@ src/main/java/com/finanzas/personales/
   "analisis": "Tu situación financiera muestra una liquidez limitada... 1) Registrá tus gastos. 2) Creá un presupuesto. 3) Construí un fondo de emergencia."
 }
 ```
-
+### Análisis financiero por período (IA)
+**GET** `/analisis/periodo?desde=2026-01-01&hasta=2026-03-31`
+**Response 200**
+```json
+{
+  "analisis": "En el período analizado tuviste ingresos por $X y egresos por $Y, con un balance de $Z. Tu mayor gasto fue en... Recomendaciones: 1)... 2)... 3)..."
+}
+```
 ---
 
 ##  Usuarios de prueba
@@ -354,8 +362,11 @@ directamente desde el navegador.
 
 ##  Enlace al despliegue
 
-> Completar cuando el despligue este hecho
+>**API (backend):** https://tp3-production.up.railway.app
+>**Probar la API (Swagger):** https://tp3-production.up.railway.app/swagger-ui/index.html
 
+> La raíz `/` responde 401 porque es una API protegida con JWT (no tiene página de inicio).
+> Para probarla, usar Swagger: registrarse en `/auth/register`, copiar el token y autorizarse.
 ---
 
 ##  Aclaraciones importantes para la corrección
