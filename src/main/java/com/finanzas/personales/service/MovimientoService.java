@@ -246,4 +246,8 @@ public class MovimientoService {
         }
     }
 
+    public List<Movimiento> listarPorUsuarioYRango(Long usuarioId, LocalDate desde, LocalDate hasta) {
+        return movimientoRepository.findByCuentaUsuarioIdAndFechaBetween(usuarioId, desde, hasta);
+    }
+
 }
