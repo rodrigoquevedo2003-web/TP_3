@@ -2,7 +2,6 @@ package com.finanzas.personales.service;
 
 
 import com.finanzas.personales.Exception.CategoriaNoEncontradaException;
-import com.finanzas.personales.Exception.PresupuestoExcedidoException;
 import com.finanzas.personales.Exception.PresupuestoInexistenteException;
 import com.finanzas.personales.Exception.ReglaNegocioException;
 import com.finanzas.personales.dto.request.PresupuestoRequestDTO;
@@ -106,11 +105,7 @@ public class PresupuestoService {
                 .findByUsuarioIdAndCategoriaIdAndMesAndAnio(usuarioId, categoriaId, fecha.getMonthValue(), fecha.getYear())
                 .ifPresent(p -> {
                     BigDecimal consumidoActual = p.getMontoConsumido() != null ? p.getMontoConsumido() : BigDecimal.ZERO;
-                    BigDecimal nuevoConsumido = p.getMontoConsumido().add(monto);
-                    if (nuevoConsumido.compareTo(p.getMontoLimite()) > 0) {
-                        throw new PresupuestoExcedidoException("El gasto supera el límite del presupuesto de la categoría para ese mes");
-                    }
-                    p.setMontoConsumido(nuevoConsumido);
+                    p.setMontoConsumido(consumidoActual.add(monto));
                     presupuestoRepository.save(p);
                 });
     }
