@@ -59,6 +59,11 @@ public class MetaAhorro {
          if(this.cumplida){
              throw new IllegalStateException("La meta ya fue cumplida");
          }
+         BigDecimal restante = this.montoObjetivo.subtract(this.montoActual);
+         if(monto.compareTo(restante) > 0){
+             throw new IllegalArgumentException(
+                     "El depósito supera el objetivo. Para completar la meta solo falta " + restante);
+         }
          this.montoActual = this.montoActual.add(monto);
          if(this.montoActual.compareTo(this.montoObjetivo) >= 0){
              this.cumplida = true;
