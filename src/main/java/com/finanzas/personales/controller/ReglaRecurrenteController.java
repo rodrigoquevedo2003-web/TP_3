@@ -42,4 +42,11 @@ public class ReglaRecurrenteController {
         service.desactivarRegla(id, usuario.getId());
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/reactivar")
+    public ResponseEntity<ReglaRecurrenteResponseDTO> reactivar(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(service.reactivarRegla(id, usuario.getId()));
+    }
 }
