@@ -1,6 +1,7 @@
 package com.finanzas.personales.service;
 
 import com.finanzas.personales.Exception.RecursoNoEncontradoException;
+import com.finanzas.personales.Exception.ReglaNegocioException;
 import com.finanzas.personales.dto.request.ReglaRecurrenteRequestDTO;
 import com.finanzas.personales.dto.response.ReglaRecurrenteResponseDTO;
 import com.finanzas.personales.model.Categoria;
@@ -72,6 +73,12 @@ public class ReglaRecurrenteService {
                 .orElseThrow(() -> new RecursoNoEncontradoException(
                         "Categoría no encontrada o no te pertenece (ID: " + dto.getCategoriaId() + ")"));
 
+        reglaRepo.buscarDuplicada(dto.getCuentaId(), dto.getCategoriaId(), dto.getTipo(), dto.getMonto())
+                .ifPresent(r -> {
+                    throw new ReglaNegocioException(
+                            "Ya tenés una regla activa igual (misma cuenta, categoría, tipo y monto).");
+                });
+
         ReglaRecurrente regla = ReglaRecurrente.builder()
                 .cuenta(cuenta)
                 .categoria(categoria)
@@ -106,6 +113,30 @@ public class ReglaRecurrenteService {
         log.info("[Service] Regla ID={} desactivada con éxito por su dueño (Usuario ID={})", reglaId, usuarioId);
     }
 
+    @Transactional
+    public ReglaRecurrenteResponseDTO reactivarRegla(Long reglaId, Long usuarioId) {
+        ReglaRecurrente regla = obtenerReglaPropia(reglaId, usuarioId);
+
+        if (Boolean.TRUE.equals(regla.getActiva())) {
+            throw new ReglaNegocioException("La regla ya está activa.");
+        }
+
+        reglaRepo.buscarDuplicada(regla.getCuenta().getId(), regla.getCategoria().getId(),
+                        regla.getTipo(), regla.getMonto())
+                .ifPresent(r -> {
+                    throw new ReglaNegocioException(
+                            "No se puede reactivar: ya existe una regla activa igual.");
+                });
+
+        if (regla.getProximaEjecucion() == null || regla.getProximaEjecucion().isBefore(LocalDate.now())) {
+            regla.setProximaEjecucion(LocalDate.now());
+        }
+
+        regla.setActiva(true);
+        ReglaRecurrente guardada = reglaRepo.save(regla);
+        log.info("[Service] Regla ID={} reactivada por su dueño (Usuario ID={})", reglaId, usuarioId);
+        return toDTO(guardada);
+    }
 
     @Transactional(readOnly = true)
     public List<ReglaRecurrenteResponseDTO> obtenerReglasPorUsuario(Long usuarioId) {
@@ -113,6 +144,19 @@ public class ReglaRecurrenteService {
                 .stream()
                 .map(this::toDTO)
                 .toList();
+    }
+
+    private ReglaRecurrente obtenerReglaPropia(Long reglaId, Long usuarioId) {
+        ReglaRecurrente regla = reglaRepo.findById(reglaId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Regla no encontrada: " + reglaId));
+
+        Long duenioId = regla.getCuenta().getUsuario().getId();
+        if (!duenioId.equals(usuarioId)) {
+            log.warn("[Seguridad] El usuario ID={} intentó operar sobre la regla ID={} del usuario ID={}",
+                    usuarioId, reglaId, duenioId);
+            throw new RecursoNoEncontradoException("No tenés permisos sobre esta regla porque no te pertenece.");
+        }
+        return regla;
     }
 
     private ReglaRecurrenteResponseDTO toDTO(ReglaRecurrente r) {
