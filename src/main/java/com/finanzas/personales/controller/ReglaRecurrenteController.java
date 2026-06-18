@@ -49,4 +49,12 @@ public class ReglaRecurrenteController {
             @AuthenticationPrincipal Usuario usuario) {
         return ResponseEntity.ok(service.reactivarRegla(id, usuario.getId()));
     }
+
+    @PostMapping("/{id}/ejecutar-ahora")
+    public org.springframework.http.ResponseEntity<ReglaRecurrenteResponseDTO> ejecutarAhora(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(
+                service.ejecutarAhora(id, usuario.getId()));
+    }
 }

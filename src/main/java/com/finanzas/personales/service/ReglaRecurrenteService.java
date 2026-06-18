@@ -138,6 +138,20 @@ public class ReglaRecurrenteService {
         return toDTO(guardada);
     }
 
+    @Transactional
+    public ReglaRecurrenteResponseDTO ejecutarAhora(Long reglaId, Long usuarioId) {
+        ReglaRecurrente regla = obtenerReglaPropia(reglaId, usuarioId);
+
+        if (!Boolean.TRUE.equals(regla.getActiva())) {
+            throw new com.finanzas.personales.Exception.ReglaNegocioException(
+                    "No se puede ejecutar una regla desactivada. Reactivala primero.");
+        }
+
+        processor.procesarReglaIndividual(regla.getId(), java.time.LocalDate.now());
+
+        return toDTO(regla);
+    }
+
     @Transactional(readOnly = true)
     public List<ReglaRecurrenteResponseDTO> obtenerReglasPorUsuario(Long usuarioId) {
         return reglaRepo.findByUsuarioId(usuarioId)
