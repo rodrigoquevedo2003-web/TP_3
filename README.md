@@ -364,6 +364,7 @@ directamente desde el navegador.
 
 >**API (backend):** https://tp3-production.up.railway.app
 >**Probar la API (Swagger):** https://tp3-production.up.railway.app/swagger-ui/index.html
+>**API (frontend):** https://finanzas-front-two.vercel.app
 
 > La raíz `/` responde 401 porque es una API protegida con JWT (no tiene página de inicio).
 > Para probarla, usar Swagger: registrarse en `/auth/register`, copiar el token y autorizarse.
