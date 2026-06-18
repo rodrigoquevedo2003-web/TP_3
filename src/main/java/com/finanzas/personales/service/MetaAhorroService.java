@@ -30,6 +30,10 @@ public class MetaAhorroService {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado"));
 
+        if (dto.getFechaLimite() != null && dto.getFechaLimite().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("La fecha límite no puede ser una fecha pasada");
+        }
+
         MetaAhorro meta = new MetaAhorro();
         meta.setNombre(dto.getNombre());
         meta.setMontoObjetivo(dto.getMontoObjetivo());
@@ -73,6 +77,10 @@ public class MetaAhorroService {
     @Transactional
     public MetaAhorroResponseDTO actualizar(Long metaId, MetaAhorroRequestDTO dto, Long usuarioId){
         MetaAhorro meta = obtenerMetaDelUsuario(metaId, usuarioId);
+
+        if (dto.getFechaLimite() != null && dto.getFechaLimite().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("La fecha límite no puede ser una fecha pasada");
+        }
 
         meta.setNombre(dto.getNombre());
         meta.setMontoObjetivo(dto.getMontoObjetivo());
@@ -186,14 +194,19 @@ public class MetaAhorroService {
 
 
     private Cuenta resolverCuenta(Long cuentaIdDto, MetaAhorro meta, Long usuarioId){
-        if(cuentaIdDto != null){
+        if (meta.getCuenta() != null) {
+            if (cuentaIdDto != null && !cuentaIdDto.equals(meta.getCuenta().getId())) {
+                throw new ReglaNegocioException(
+                        "Esta meta está atada a una cuenta. Solo podés operar con esa cuenta.");
+            }
+            return meta.getCuenta();
+        }
+
+        if (cuentaIdDto != null) {
             Cuenta cuenta = cuentaRepository.findById(cuentaIdDto)
                     .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada"));
             validarCuentaDelUsuario(cuenta, usuarioId);
             return cuenta;
-        }
-        if(meta.getCuenta() != null){
-            return meta.getCuenta();
         }
         throw new CuentaNoEncontradaException("Debe indicar una cuenta. La meta no tiene cuenta por defecto asignada");
     }
